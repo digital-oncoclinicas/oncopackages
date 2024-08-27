@@ -1,10 +1,8 @@
-from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 from botcity.web.bot import ActionChains, WebBot, By
 
 
 class WebBotOp(WebBot):
-    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
+    def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__()
         self.bd_tasy = bd_tasy
         self.bd_rpa = bd_rpa
