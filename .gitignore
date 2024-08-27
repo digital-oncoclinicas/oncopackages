@@ -21,7 +21,6 @@ dist/
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/
@@ -37,7 +36,6 @@ Thumbs.db
 
 # Applications
 *.app
-*.exe
 *.war
 
 # Large media files
@@ -47,4 +45,4 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
-
+*.zip

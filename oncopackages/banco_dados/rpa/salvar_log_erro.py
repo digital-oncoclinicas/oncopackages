@@ -1,0 +1,102 @@
+from botcity.web import WebBot
+import config
+import pyodbc
+import socket
+import sys
+
+
+def gerar_sequencia_erro(task_name: str, error_line: str, error_message: str) -> int:
+    """
+    Executa a procedure 'INSERIR_LOG_ERRO' do banco de dados do robô.
+    :param task_name: Nome da função que está sendo executada;
+    :param error_line: Linha em que o erro ocorreu;
+    :param error_message: Mensagem do erro.
+    :return: Código do erro.
+    """
+    conn = cursor = None
+
+    try:
+        # Conecta com o banco de dados
+        conn = pyodbc.connect(
+            'Driver={SQL Server};'
+            f'Server={config.RPA_DB_SERVER};'
+            f'Database={config.RPA_DB_NAME};'
+            f'UID={config.RPA_DB_USER};'
+            f'PWD={config.RPA_DB_PWD};')
+
+        # Cria o cursor
+        cursor = conn.cursor()
+
+        # Montando a query sql para execução da procedure
+        query = """DECLARE @Out int;
+                    EXEC [RPA].[INSERIR_LOG_ERRO] @rpa = ?, @taskName = ?, @errorlineNumber = ?, @errorMessage = ?, 
+                    @runner = ?, @nrSequencia = @Out OUTPUT;
+                    SELECT @Out;"""
+
+        # Criando lista de parâmetros de entrada da procedure
+        error_message = str(error_message).replace("'", "")
+        runner = socket.gethostname()
+        parametros = (config.RPA_SHORT_NAME, task_name, error_line, error_message, runner)
+
+        # Executando a procedure
+        cursor.execute(query, parametros)
+
+        # Pegando o valor de retorno
+        row = cursor.fetchone()
+        nr_seq_erro = row[0]
+
+        # Salva as alterações
+        conn.commit()
+
+        return nr_seq_erro
+
+    except:
+        error_line = sys.exc_info()[2].tb_lineno
+        error_message = sys.exc_info()[1]
+        print(f'Falha ao salvar o log de erro no banco de dados - {error_line}:{error_message}')
+
+    finally:
+        # Fecha o curso
+        if cursor is not None:
+            cursor.close()
+        # Encerra a conexão com o banco de dados
+        if conn is not None:
+            conn.close()
+
+
+def salvar_log_erro(task_error_message: str, bot: WebBot = None) -> list:
+    """
+    Salva log de erro no banco de dados e o print de tela na pasta do robô.
+    :param task_error_message: Mensagem de erro padrão da função atual;
+    :param bot: Objeto do navegador usado para tirar o print de tela.
+    :return: Lista com [tipo de exceção, mensagem do erro, código do erro]
+    """
+
+    # Extrair o nome da função, Linha e Mensagem de erro usando a biblioteca 'sys'
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    task_name = exc_traceback.tb_frame.f_code.co_name
+    error_line = exc_traceback.tb_lineno
+    error_message = str(exc_value)
+
+    # Verificar se error_message é um erro do código ou um erro mapeado
+    if config.EXCECAO_SISTEMA in error_message or config.EXCECAO_NEGOCIO in error_message:  # Erro mapeado
+        # Transformar a string em lista e verificar se o erro veio de uma task filha
+        error_message = eval(error_message)
+        if len(error_message) == 2:  # Erro na task atual/mãe
+            error_seq = gerar_sequencia_erro(task_name, error_line, error_message[1])
+            error_message.append(error_seq)
+        else:  # Se não, erro na task filha. Nesse caso, nada a ser feito!
+            error_seq = error_message[2]
+    else:  # Erro não mapeado
+        error_seq = gerar_sequencia_erro(task_name, error_line, error_message)
+        error_message = ["Excecao_Sistema", task_error_message, error_seq]
+
+    # Print de tela caso o objeto bot != None
+    if bot and bot.capabilities:
+        try:
+            bot.screenshot(fr'{config.RPA_DIR_PRINT}\{error_seq}.png')
+        except:
+            pass
+
+    return error_message
+
