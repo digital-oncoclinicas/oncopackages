@@ -1,10 +1,9 @@
 from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 import time
 
 
 class ContaPaciente(BancoDadosTasy):
-    def __init__(self, bd_rpa: BancoDadosRpa):
+    def __init__(self, bd_rpa):
         super().__init__(bd_rpa)
 
     def confirmar_taxa_adicionada(self, nr_sequencia: str) -> bool:

@@ -1,9 +1,8 @@
 from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 
 
 class AutorizacaoConvenio(BancoDadosTasy):
-    def __init__(self, bd_rpa: BancoDadosRpa):
+    def __init__(self, bd_rpa):
         super().__init__(bd_rpa)
             
     def carteirinha(self, autorizacao: str) -> str:

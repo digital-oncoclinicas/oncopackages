@@ -1,13 +1,11 @@
-from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
 from oncopackages.pastas_arquivos import pastas_arquivos
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 from oncopackages.tasy.tasy import Tasy
 from botcity.web.bot import By, Keys
 from datetime import datetime
 
 
 class AutorizacaoConvenio(Tasy):
-    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
+    def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__(bd_rpa, bd_tasy)
         
     def pesquisar_sequencia_autorizacao(self, seq_autorizacao: str):

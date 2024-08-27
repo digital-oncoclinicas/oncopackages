@@ -1,14 +1,12 @@
 from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, HEADLESS, EXCECAO_SISTEMA, EXCECAO_NEGOCIO
-from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
 from oncopackages.pastas_arquivos import pastas_arquivos
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 from oncopackages.ferramentas.web_bot import WebBotOp
 from botcity.web.bot import ActionChains, By
 import urllib.parse
 
 
 class Tasy(WebBotOp):
-    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
+    def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__(bd_rpa, bd_tasy)
 
         # Define se o navegador vai ficar visível ou não

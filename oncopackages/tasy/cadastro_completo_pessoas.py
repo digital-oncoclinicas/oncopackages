@@ -1,12 +1,10 @@
-from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 from oncopackages.tasy.tasy import Tasy
 from botcity.web.bot import By, Keys
 import datetime
 
 
 class CadastroCompletoPessoas(Tasy):
-    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
+    def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__(bd_rpa, bd_tasy)
     
     def acessar_aba_classificacao_paciente(self):
