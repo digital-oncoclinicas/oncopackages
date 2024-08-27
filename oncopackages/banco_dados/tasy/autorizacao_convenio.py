@@ -78,7 +78,7 @@ class AutorizacaoConvenio(BancoDadosTasy):
     
             return arquivos
     
-        except:
+        except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro)
             raise ValueError(error_message)
     
@@ -114,7 +114,7 @@ class AutorizacaoConvenio(BancoDadosTasy):
     
             return {"nr_crm": row[0], "uf_crm": row[1], "nm_medico": row[2]}
     
-        except:
+        except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro)
             raise ValueError(error_message)
     
@@ -153,7 +153,7 @@ class AutorizacaoConvenio(BancoDadosTasy):
     
             return rows
     
-        except:
+        except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro)
             raise ValueError(error_message)
     
@@ -200,7 +200,7 @@ class AutorizacaoConvenio(BancoDadosTasy):
                     "superficie_corporal": row[4],
                     "cd_pessoa_fisica": row[5]}
     
-        except:
+        except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro)
             raise ValueError(error_message)
     
@@ -241,7 +241,7 @@ class AutorizacaoConvenio(BancoDadosTasy):
     
             return row[0]
     
-        except:
+        except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro)
             raise ValueError(error_message)
     
