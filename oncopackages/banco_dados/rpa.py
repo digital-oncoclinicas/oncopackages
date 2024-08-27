@@ -93,3 +93,8 @@ class BancoDadosRpa:
 
         return error_message
 
+    def encerrar_conexao(self):
+        if self.cursor:
+            self.cursor.close()
+        if self.conn:
+            self.conn.close()

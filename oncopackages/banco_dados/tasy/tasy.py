@@ -1,10 +1,9 @@
 from config import TASY_DB_USER, TASY_DB_PWD, TASY_DB_HOSTNAME, TASY_DB_SERVICENAME
-from oncopackages.banco_dados.rpa import BancoDadosRpa
 import oracledb
 
 
 class BancoDadosTasy:
-    def __init__(self, bd_rpa: BancoDadosRpa):
+    def __init__(self, bd_rpa):
         # Conecta com o banco de dados do Tasy
         self.conn = oracledb.connect(
             user=TASY_DB_USER,
@@ -16,3 +15,9 @@ class BancoDadosTasy:
         self.cursor = self.conn.cursor()
 
         self.bd_rpa = bd_rpa
+
+    def encerrar_conexao(self):
+        if self.cursor:
+            self.cursor.close()
+        if self.conn:
+            self.conn.close()
