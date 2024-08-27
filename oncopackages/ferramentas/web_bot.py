@@ -1,10 +1,13 @@
-from botcity.web.bot import ActionChains
-from botcity.web import WebBot, By
+from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
+from oncopackages.banco_dados.rpa import BancoDadosRpa
+from botcity.web.bot import ActionChains, WebBot, By
 
 
 class WebBotOp(WebBot):
-    def __init__(self):
+    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
         super().__init__()
+        self.bd_tasy = bd_tasy
+        self.bd_rpa = bd_rpa
 
     def search_element(self, xpath: str, waiting_time: int = 15, delay: int = 0):
         """
@@ -180,6 +183,6 @@ class WebBotOp(WebBot):
     
                 raise Exception(['Excecao_Sistema', error_message + 'Confirmação do upload não encontrada.'])
         except Exception:
-            # error_message = salvar_log_erro(sys, error_message)
+            error_message = self.bd_rpa.salvar_log_erro(error_message)
             raise ValueError(error_message)
 

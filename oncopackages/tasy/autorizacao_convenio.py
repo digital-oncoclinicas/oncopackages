@@ -1,17 +1,14 @@
-from onco_packages.banco_dados.tasy.autorizacao_convenio import procedimento_interno
-from onco_packages.pastas_arquivos import pastas_arquivos
-from onco_packages.banco_dados.rpa_ import BancoDadosRpa
-from onco_packages.ferramentas.web_bot import WebBotOp
-from botcity.web.bot import ActionChains, By, Keys
+from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
+from oncopackages.pastas_arquivos import pastas_arquivos
+from oncopackages.banco_dados.rpa import BancoDadosRpa
+from oncopackages.tasy.tasy import Tasy
+from botcity.web.bot import By, Keys
 from datetime import datetime
 
-bd_rpa = BancoDadosRpa()
 
-
-class AutorizacaoConvenio(WebBotOp):
-    def __init__(self, driver):
-        super().__init__()
-        self._driver = driver   
+class AutorizacaoConvenio(Tasy):
+    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
+        super().__init__(bd_rpa, bd_tasy)
         
     def pesquisar_sequencia_autorizacao(self, seq_autorizacao: str):
         """
@@ -46,7 +43,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Negocio", mensagem_erro + "Autorização não localizada."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def excluir_autorizacao(self):
@@ -77,7 +74,7 @@ class AutorizacaoConvenio(WebBotOp):
             raise Exception(["Excecao_Negocio", mensagem_erro + "Falha após confirmar a exclusão."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def adicionar_historico_autorizacao(self, tipo_historico: str, historico: str):
@@ -139,7 +136,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Sistema", mensagem_erro + "Não foi possível confirmar a inclusão do histórico."])
     
         except Exception:
-            mensagem_erro = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            mensagem_erro = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(mensagem_erro)
     
     def alterar_estagio(self, nome_estagio: str, motivo: str = None, autorizacao: str = None):
@@ -196,7 +193,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Negocio", mensagem_erro + "Timeout ao confirmar a alteração."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def inserir_solicitacao(self, solicitacao: str):
@@ -227,7 +224,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Negocio", mensagem_erro + "Timeout ao confirmar a alteração."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def atualizar_procedimentos(self, lista_procedimentos: list):
@@ -246,7 +243,7 @@ class AutorizacaoConvenio(WebBotOp):
                 # Se o procedimento não for encontrado, deve ser adicionado.
                 if not self.find_element(f"//span[text() = '{procedimento}']", By.XPATH, waiting_time=3000):
                     # Pega o código do procedimento no banco de dados do robô
-                    proc_interno = procedimento_interno(procedimento)
+                    proc_interno = self.bd_tasy.procedimento_interno(procedimento)
     
                     self.adicionar_procedimento(
                         cd_procedimento_interno=proc_interno, qt_autorizada=qt_autorizada, qt_solicitada=qt_solicitada
@@ -284,7 +281,7 @@ class AutorizacaoConvenio(WebBotOp):
                     self.wait(2000)
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def adicionar_procedimento(self, cd_procedimento_interno: str, qt_solicitada: str, qt_autorizada: str) -> None:
@@ -346,7 +343,7 @@ class AutorizacaoConvenio(WebBotOp):
             self.wait(2000)
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def atualizar_materiais(self):
@@ -419,7 +416,7 @@ class AutorizacaoConvenio(WebBotOp):
                         raise Exception(["Excecao_Sistema", mensagem_erro + f"Timeout ao confirmar a atualização."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def anexar_arquivo(self, tipo_anexo: str, dir_arquivo: str):
@@ -475,86 +472,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Sistema", mensagem_erro + "Timeout ao confirmar o upload do anexo."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
-            raise ValueError(error_message)
-    
-    def pesquisar_prontuario(self, prontuario: str):
-        """
-        Realiza a pesquisa pelo prontuário do paciênte na função Autorização Convênio do Tasy.
-        :param prontuario: Prontuário do paciente.
-        """
-        mensagem_erro = f"Falha ao pesquisar pela prontuário {prontuario}. "
-        try:
-            # Espera o desenho da lupa que fica no canto superior esquerdo aparecer
-            xpath = "//div[@class='person-icon-finder']"
-            if not self.find_element(xpath, By.XPATH):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Localizar paciente) não localizado."])
-    
-            # Se não for a primeira pesquisa, realizar o filtro a partir do campo 'Código' da barra superior.
-            consulta_realizada = False
-            xpath = "//a[@class='btn inline-edit-link ng-scope']"
-            if self.find_element(xpath, By.XPATH, waiting_time=2000):
-                # Clica no desenho do lapis para editar o campo 'Código'
-                action = ActionChains(self.driver)
-                elemento = self.find_element(xpath, By.XPATH)
-                action.click(elemento).perform()
-    
-                # Insere o prontuário e tecla 'Enter' para pesquisar
-                xpath = "//div[span[text()='Código']]/div/span/input"
-                if self.find_element(xpath, By.XPATH, waiting_time=2000, ensure_visible=True):
-                    self.find_element(xpath, By.XPATH, ensure_visible=True).send_keys(prontuario)
-                    self.enter()
-                    consulta_realizada = True
-    
-            # Se for a primeira pesquisa ou não for possível realizar a pesquisa pelo método anterior,
-            # realizar o filtro a partir do botão com o símbolo da lupa.
-            if consulta_realizada is False:
-                # Clicar no ícone de Pesquisar que fica no canto superior esquerdo
-                if not self.element_click("//div[div[@class='person-icon-finder']]"):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Icone de pesquisa (Luga) não localizado."])
-    
-                # Ativa a aba 'Pessoa'
-                if not self.element_click("//div[span[text()='Pessoa']]"):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Aba 'Pessoa' não localizada."])
-    
-                # Insere o número do prontuário no campo de pesquisa
-                if not self.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Campo 'Código' não localizado."])
-    
-                # Clica no botão Filtrar
-                if not self.element_click(xpath="//button[contains(text(),'Filtrar')]", delay=500):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Filtrar) não localizado."])
-    
-                # Espera o prontuário aparecer na tabela de resultados
-                if not self.element_wait_displayed(f"//div[div/div/span[text()='{prontuario}']]"):
-                    raise Exception(["Excecao_Negocio", mensagem_erro + "Prontuario não localizado."])
-    
-                # Clica no botão 'Ok'
-                if not self.element_click("//button[span[text() = 'Ok']]"):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Ok) não localizado."])
-    
-                # Espera a tela da função "Cadastro Completo de Pessoa" carregar
-                if not self.element_wait_displayed("//*[text() = 'Todos complementos']"):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de resultado da pesquisa não localizada."])
-    
-                # Clica no botão 'Ok' caso apareça algum popup com o título 'Informação'
-                self.element_click("//button[text() = 'Ok']", tentativas=4)
-    
-                # Fecha a função 'Cadastro Completo de Pessoa'
-                xpath = "//div[span[text()='Cadastro Completo de Pessoas']]/button"
-                if not self.element_click(xpath=xpath):
-                    mensagem_erro += "Não foi possível encerrar a função (Cadastro Completo de Pessoa)."
-                    raise Exception(["Excecao_Sistema", mensagem_erro])
-    
-            # Verifica se retornou para a função 'Autorização Convênio'
-            if not self.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de resultado da pesquisa não localizada."])
-    
-            # Clica no botão 'Fechar' caso apareça algum popup de alerta apareça
-            self.element_click("//button[span[text()='Fechar']]", tentativas=6)
-    
-        except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def adicionar_autorizacao(self,
@@ -578,9 +496,7 @@ class AutorizacaoConvenio(WebBotOp):
         :param indicacao_clinica: Indicação clínica.
         :return: Sequência da nova autorização.
         """
-    
         mensagem_erro = "Falha ao adicionar nova autorização. "
-    
         try:
             # Clica no botão 'Adicionar'
             if not self.element_click(xpath="//*[contains(text(), 'Adicionar')]", delay=1000):
@@ -666,7 +582,7 @@ class AutorizacaoConvenio(WebBotOp):
             return autorizacao
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def vincular_atendimento(self, autorizacao: str, atendimento: str):
@@ -718,7 +634,7 @@ class AutorizacaoConvenio(WebBotOp):
             raise Exception(["Excecao_Sistema", mensagem_erro + "Não foi possível confirmar o vínculo do atendimento."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def gerar_relatorio_cate(self, autorizacao: str, cate: str) -> str:
@@ -762,7 +678,7 @@ class AutorizacaoConvenio(WebBotOp):
             return arquivo_baixado
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def acessar_autorizacao(self, autorizacao: str):
@@ -781,7 +697,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Sistema", mensagem_erro + "Tela com dados da autorização não localizada."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def retornar_tabela_autorizacoes(self) -> None:
@@ -798,7 +714,7 @@ class AutorizacaoConvenio(WebBotOp):
                 raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de autorizações não localizada."])
     
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
     def limpar_filtro_autorizacao(self):
@@ -813,6 +729,6 @@ class AutorizacaoConvenio(WebBotOp):
             if not self.element_click(xpath="//div[text()='Limpar filtros']"):
                 raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Limpar filtros) não encontrado."])
         except Exception:
-            error_message = bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
 

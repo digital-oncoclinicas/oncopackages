@@ -1,14 +1,15 @@
 from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, HEADLESS, EXCECAO_SISTEMA, EXCECAO_NEGOCIO
-from onco_packages.banco_dados.rpa.salvar_log_erro import salvar_log_erro
-from onco_packages.pastas_arquivos import pastas_arquivos
-from onco_packages.ferramentas.web_bot import WebBotOp
+from oncopackages.banco_dados.tasy.tasy import BancoDadosTasy
+from oncopackages.pastas_arquivos import pastas_arquivos
+from oncopackages.banco_dados.rpa import BancoDadosRpa
+from oncopackages.ferramentas.web_bot import WebBotOp
 from botcity.web.bot import ActionChains, By
 import urllib.parse
 
 
 class Tasy(WebBotOp):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
+        super().__init__(bd_rpa, bd_tasy)
 
         # Define se o navegador vai ficar visível ou não
         self.headless = HEADLESS
@@ -52,7 +53,7 @@ class Tasy(WebBotOp):
             raise Exception([EXCECAO_SISTEMA, mensagem_erro])
 
         except Exception:
-            error_message = salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
 
     def trocar_estabelecimento(self, estabelecimento: str):
@@ -91,7 +92,7 @@ class Tasy(WebBotOp):
             self.find_element("//button[contains(text(), 'Ok')]", By.XPATH).click()
 
         except Exception:
-            error_message = salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
 
     def executar_funcao(self, tasy_funcao: str, clicar_seta_direita: bool = False, clicar_seta_esquerda: bool = False):
@@ -124,7 +125,7 @@ class Tasy(WebBotOp):
                 raise Exception([EXCECAO_SISTEMA, mensagem_erro + f"Função ({tasy_funcao}) não localizada."])
 
         except Exception:
-            error_message = salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
 
     def fechar_funcao(self, nome_funcao: str) -> None:
@@ -143,7 +144,7 @@ class Tasy(WebBotOp):
                 raise Exception([EXCECAO_SISTEMA, mensagem_erro + f"Função ({nome_funcao}) não encerrada."])
 
         except Exception:
-            error_message = salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
 
     def download_arquivo(self, url_arquivo: str, timeout: int = 30000) -> str:
@@ -186,7 +187,7 @@ class Tasy(WebBotOp):
             return dir_arquivo
 
         except Exception:
-            error_message = salvar_log_erro(f"Falha ao baixar o arquivo ({nome_arquivo}) do Tasy.", self)
+            error_message = self.bd_rpa.salvar_log_erro(f"Falha ao baixar o arquivo ({nome_arquivo}) do Tasy.", self)
             self.navigate_to(TASY_URL)
             raise ValueError(error_message)
 
@@ -230,7 +231,7 @@ class Tasy(WebBotOp):
             return arquivo_baixado
 
         except Exception:
-            error_message = salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
 
     def pesquisar_prontuario(self, prontuario: str, fechar_ccp: bool = False):
@@ -311,5 +312,5 @@ class Tasy(WebBotOp):
             self.element_click("//button[span[text()='Fechar']]", tentativas=6)
 
         except Exception:
-            error_message = salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)

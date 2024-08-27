@@ -1,5 +1,6 @@
+from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, EXCECAO_SISTEMA,
+                    EXCECAO_NEGOCIO, RPA_DIR_PRINT)
 from botcity.web import WebBot
-import config
 import pyodbc
 import socket
 import sys
@@ -10,15 +11,15 @@ class BancoDadosRpa:
         # Conecta com o banco de dados
         self.conn = pyodbc.connect(
             'Driver={SQL Server};'
-            f'Server={config.RPA_DB_SERVER};'
-            f'Database={config.RPA_DB_NAME};'
-            f'UID={config.RPA_DB_USER};'
-            f'PWD={config.RPA_DB_PWD};')
+            f'Server={RPA_DB_SERVER};'
+            f'Database={RPA_DB_NAME};'
+            f'UID={RPA_DB_USER};'
+            f'PWD={RPA_DB_PWD};')
 
         # Cria o cursor
         self.cursor = self.conn.cursor()
 
-    def gerar_sequencia_erro(self, task_name: str, error_line: str, error_message: str) -> int:
+    def __gerar_sequencia_erro(self, task_name: str, error_line: str, error_message: str) -> int:
         """
         Executa a procedure 'INSERIR_LOG_ERRO' do banco de dados do robô.
         :param task_name: Nome da função que está sendo executada;
@@ -37,7 +38,7 @@ class BancoDadosRpa:
             # Criando lista de parâmetros de entrada da procedure
             error_message = str(error_message).replace("'", "")
             runner = socket.gethostname()
-            parametros = (config.RPA_SHORT_NAME, task_name, error_line, error_message, runner)
+            parametros = (RPA_SHORT_NAME, task_name, error_line, error_message, runner)
 
             # Executando a procedure
             self.cursor.execute(query, parametros)
@@ -71,22 +72,22 @@ class BancoDadosRpa:
         error_message = str(exc_value)
 
         # Verificar se error_message é um erro do código ou um erro mapeado
-        if config.EXCECAO_SISTEMA in error_message or config.EXCECAO_NEGOCIO in error_message:  # Erro mapeado
+        if EXCECAO_SISTEMA in error_message or EXCECAO_NEGOCIO in error_message:  # Erro mapeado
             # Transformar a string em lista e verificar se o erro veio de uma task filha
             error_message = eval(error_message)
             if len(error_message) == 2:  # Erro na task atual/mãe
-                error_seq = self.gerar_sequencia_erro(task_name, error_line, error_message[1])
+                error_seq = self.__gerar_sequencia_erro(task_name, error_line, error_message[1])
                 error_message.append(error_seq)
             else:  # Se não, erro na task filha. Nesse caso, nada a ser feito!
                 error_seq = error_message[2]
         else:  # Erro não mapeado
-            error_seq = self.gerar_sequencia_erro(task_name, error_line, error_message)
-            error_message = ["Excecao_Sistema", task_error_message, error_seq]
+            error_seq = self.__gerar_sequencia_erro(task_name, error_line, error_message)
+            error_message = [EXCECAO_SISTEMA, task_error_message, error_seq]
 
         # Print de tela caso o objeto bot != None
         if bot and bot.capabilities:
             try:
-                bot.screenshot(fr'{config.RPA_DIR_PRINT}\{error_seq}.png')
+                bot.screenshot(fr'{RPA_DIR_PRINT}\{error_seq}.png')
             except:
                 pass
 
