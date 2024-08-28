@@ -1,8 +1,7 @@
-from onco_packages.banco_dados.rpa import salvar_log_erro
 from anticaptchaofficial.recaptchav2proxyless import recaptchaV2Proxyless
 from anticaptchaofficial.recaptchav3proxyless import recaptchaV3Proxyless
+from oncopackages.banco_dados.rpa import salvar_log_erro
 import config
-import sys
 
 
 def recaptcha_v2_proxyless(site_url: str, site_key: str) -> str:
@@ -14,7 +13,6 @@ def recaptcha_v2_proxyless(site_url: str, site_key: str) -> str:
 
     Documentação da API da Anti Captcha: https://anti-captcha.com/pt/apidoc
     """
-
     mensagem_erro = "Falha ao resolver o captcha. "
     try:
         solver = recaptchaV2Proxyless()  # Tipo de CAPTCHAR
@@ -33,7 +31,7 @@ def recaptcha_v2_proxyless(site_url: str, site_key: str) -> str:
             raise Exception(["Excecao_Sistema", mensagem_erro + solver.error_code + ":" + solver.err_string])
 
     except Exception:
-        error_message = salvar_log_erro(sys, mensagem_erro)
+        error_message = salvar_log_erro(mensagem_erro)
         raise ValueError(error_message)
 
 
@@ -46,7 +44,6 @@ def recaptcha_v3_proxyless(site_url: str, site_key: str) -> str:
 
     Documentação da API da Anti Captcha: https://anti-captcha.com/pt/apidoc
     """
-
     mensagem_erro = "Falha ao resolver o captcha. "
     try:
         solver = recaptchaV3Proxyless()  # Tipo de CAPTCHAR
@@ -64,9 +61,9 @@ def recaptcha_v3_proxyless(site_url: str, site_key: str) -> str:
         else:
             # print("task finished with error " + solver.error_code)
             # print("task finished with error " + solver.err_string)
-            raise Exception(["Excecao_Sistema", mensagem_erro + solver.error_code + ":" + solver.err_string])
+            raise Exception([config.EXCECAO_SISTEMA, mensagem_erro + solver.error_code + ":" + solver.err_string])
 
     except Exception:
-        error_message = salvar_log_erro(sys, mensagem_erro)
+        error_message = salvar_log_erro(mensagem_erro)
         raise ValueError(error_message)
 

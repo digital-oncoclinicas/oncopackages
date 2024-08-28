@@ -1,9 +1,9 @@
-from onco_packages.banco_dados.rpa.salvar_log_erro import salvar_log_erro
+from config import RPA_DIR_PRINT, RPA_DIR_DOWNLOADS, EXCECAO_SISTEMA
+from oncopackages.banco_dados.rpa import salvar_log_erro
 from botcity.web import WebBot
 from datetime import datetime
 import zipfile
 import shutil
-import config
 import sys
 import os
 
@@ -23,45 +23,20 @@ def nova_pasta(caminho: str, substituir_pasta_existente: bool = False):
     os.makedirs(caminho, exist_ok=True)
 
 
-def copiar_arquivo(caminho_origem: str, caminho_destino: str):
-    """
-    Esta função move os arquivos da pasta de origem para a pasta de destino especificadas nos parâmetros
-    a função não apaga os arquivos no destino.
-    :param caminho_origem: Caminho de origem do arquivo;
-    :param caminho_destino: Caminho par onde os arquivos estão sendo movidos (novo lugar);
-    """
-
-    caminho_arquivo = shutil.copy(caminho_origem, caminho_destino)
-    return caminho_arquivo
-
-
-def listar_arquivos(caminho_pasta: str) -> list:
-    """
-    Esta função lista os arquivos e pastas de um diretório
-    :param caminho_pasta = diretório que queira listar os aquivos contidos
-    :return = retorna uma lista de arquivos
-    """
-    lista = os.listdir(caminho_pasta)
-
-    return lista
-
-
 def limpar_pasta_prints(quantidade_dias: int = 15):
     """
     Exclui os arquivos da pasta de prints do robô.
     :param quantidade_dias: Arquivos com mais de 'quantidade_dias' serão excluídos.
     """
-
     mensagem_erro = f"Falha ao excluir arquivos da pasta de prints."
-
     try:
         # Pegar a data de hoje
         hoje = datetime.today().date()
 
         # Loop por todos os arquivos da pasta de prints, em ordem decrescente
-        for arquivo in os.listdir(config.RPA_DIR_PRINT):
+        for arquivo in os.listdir(RPA_DIR_PRINT):
             # Pega o caminho completo do arquivo
-            caminho_arquivo = os.path.join(config.RPA_DIR_PRINT, arquivo)
+            caminho_arquivo = os.path.join(RPA_DIR_PRINT, arquivo)
             # Se certifica que não se trata de um arquivo temporário
             if os.path.isfile(caminho_arquivo):
                 # Pega a data de criação do arquivo
@@ -71,7 +46,7 @@ def limpar_pasta_prints(quantidade_dias: int = 15):
                     os.remove(caminho_arquivo)
                 else:
                     break
-    except Exception:
+    except:
         error_message = salvar_log_erro(mensagem_erro)
         print(error_message)
         # raise ValueError(error_message)
@@ -104,7 +79,6 @@ def esperar_conclusao_download(bot: WebBot, extensao_arquivo: str = '.pdf', time
     :param timeout: tempo máximo de espera pela conclusão do download.
     :return: Diretório completo do arquivo baixado.
     """
-
     try:
         # Conta a quantidade de arquivos na pasta de downloads com a mesma extensão do arquivo que será baixado
         qt_arquivos_antes = bot.get_file_count(file_extension=extensao_arquivo)
@@ -118,10 +92,10 @@ def esperar_conclusao_download(bot: WebBot, extensao_arquivo: str = '.pdf', time
             bot.wait(500)
 
         if qt_arquivos_apos <= qt_arquivos_antes:
-            raise Exception(['Excecao_Sistema', f'Timeout ao esperar a conclusão do download.'])
+            raise Exception([EXCECAO_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
 
         # Pega o diretório completo do arquivo baixado
-        dir_arquivo = bot.get_last_created_file(path=config.RPA_DIR_DOWNLOADS)
+        dir_arquivo = bot.get_last_created_file(path=RPA_DIR_DOWNLOADS)
 
         return dir_arquivo
 
@@ -147,7 +121,7 @@ def chrome_driver_path():
                 shutil.move(caminho_completo, dir_chromedriver)
                 return dir_chromedriver
 
-        raise Exception(["Excecao_Sistema", error_messagem + "Chromedriver.exe não localizado."])
+        raise Exception([EXCECAO_SISTEMA, error_messagem + "Chromedriver.exe não localizado."])
 
     except Exception:
         error_message = salvar_log_erro(error_messagem)

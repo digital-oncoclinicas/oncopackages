@@ -1,4 +1,5 @@
 from botcity.web.bot import ActionChains, WebBot, By
+from config import EXCECAO_SISTEMA
 
 
 class WebBotOp(WebBot):
@@ -15,7 +16,6 @@ class WebBotOp(WebBot):
         :param delay: Tempo de espera após encontrado (em segundos).
         :return: WebElement.
         """
-
         for n in range(waiting_time):
             try:
                 elementos = self.find_elements(xpath, By.XPATH)
@@ -179,7 +179,7 @@ class WebBotOp(WebBot):
                 if self.find_element(xpath_confirmacao, By.XPATH, waiting_time=timeout, ensure_clickable=True):
                     return True
     
-                raise Exception(['Excecao_Sistema', error_message + 'Confirmação do upload não encontrada.'])
+                raise Exception([EXCECAO_SISTEMA, error_message + 'Confirmação do upload não encontrada.'])
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(error_message)
             raise ValueError(error_message)

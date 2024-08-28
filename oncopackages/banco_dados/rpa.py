@@ -28,7 +28,6 @@ class BancoDadosRpa:
         :return: Código do erro.
         """
         try:
-
             # Montando a query sql para execução da procedure
             query = """DECLARE @Out int;
                         EXEC [RPA].[INSERIR_LOG_ERRO] @rpa = ?, @taskName = ?, @errorlineNumber = ?, @errorMessage = ?, 
@@ -98,3 +97,11 @@ class BancoDadosRpa:
             self.cursor.close()
         if self.conn:
             self.conn.close()
+
+
+def salvar_log_erro(task_error_message: str, bot: WebBot = None) -> list:
+    bd_rpa = BancoDadosRpa()
+    try:
+        return bd_rpa.salvar_log_erro(task_error_message, bot)
+    finally:
+        bd_rpa.encerrar_conexao()
