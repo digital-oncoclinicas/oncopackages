@@ -18,7 +18,7 @@ class WebBotOp(WebBot):
         """
         for n in range(waiting_time):
             try:
-                elementos = self.find_elements(xpath, By.XPATH)
+                elementos = self.find_elements(xpath, By.XPATH, waiting_time=0)
                 for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
