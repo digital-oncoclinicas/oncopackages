@@ -184,3 +184,58 @@ class WebBotOp(WebBot):
             error_message = self.bd_rpa.salvar_log_erro(error_message)
             raise ValueError(error_message)
 
+    def esperar_conclusao_download(self, extensao_arquivo: str = '.pdf', timeout: int = 30000) -> str:
+        """
+        Espera a conclusão do download do arquivo e retorna o diretório completo dele.
+        :param bot: Objeto da BotCity.
+        :param extensao_arquivo: Formato do arquivo que será baixado. Exemplo: .pdf, .png, .xlsx...
+        :param timeout: tempo máximo de espera pela conclusão do download.
+        :return: Diretório completo do arquivo baixado.
+        """
+        try:
+            # Conta a quantidade de arquivos na pasta de downloads com a mesma extensão do arquivo que será baixado
+            qt_arquivos_antes = bot.get_file_count(file_extension=extensao_arquivo)
+
+            # Espera a conclusão do download por até timeout segundos
+            qt_arquivos_apos = 0
+            for i in range(int(timeout / 500)):
+                qt_arquivos_apos = bot.get_file_count(file_extension=extensao_arquivo)
+                if qt_arquivos_apos > qt_arquivos_antes:
+                    break
+                bot.wait(500)
+
+            if qt_arquivos_apos <= qt_arquivos_antes:
+                raise Exception([LOG_EX_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
+
+            # Pega o diretório completo do arquivo baixado
+            dir_arquivo = bot.get_last_created_file(path=RPA_DIR_DOWNLOADS)
+
+            return dir_arquivo
+
+        except Exception:
+            error_message = salvar_log_erro(f"Falha ao esperar a conclusão do download.", bot)
+            raise ValueError(error_message)
+
+    def chrome_driver_path():
+        """
+        Retorna o endereço completo do chromedriver.exe.
+        """
+        error_messagem = 'Falha capturar o endereço do chromedriver.exe. '
+        try:
+            pasta_arquivos = sys.prefix + r"\Lib\site-packages\oncopackages\chrome_driver"
+            for arquivo in os.listdir(pasta_arquivos):
+                if "chromedriver" in arquivo and arquivo.endswith(".exe"):
+                    dir_chromedriver = os.path.join(pasta_arquivos, arquivo)
+                    return dir_chromedriver
+                elif "chromedriver" in arquivo and arquivo.endswith(".py"):
+                    caminho_completo = os.path.join(pasta_arquivos, arquivo)
+                    dir_chromedriver = os.path.splitext(caminho_completo)[0] + '.exe'
+                    shutil.move(caminho_completo, dir_chromedriver)
+                    return dir_chromedriver
+
+            raise Exception([LOG_EX_SISTEMA, error_messagem + "Chromedriver.exe não localizado."])
+
+        except Exception:
+            error_message = salvar_log_erro(error_messagem)
+            raise ValueError(error_message)
+

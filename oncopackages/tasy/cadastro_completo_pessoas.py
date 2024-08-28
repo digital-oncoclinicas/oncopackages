@@ -1,3 +1,4 @@
+from config import LOG_EX_NEGOCIO, LOG_EX_SISTEMA
 from oncopackages.tasy.tasy import Tasy
 from botcity.web.bot import By, Keys
 import datetime
@@ -78,13 +79,13 @@ class CadastroCompletoPessoas(Tasy):
     
                     # Clica em 'Ver'
                     if not self.element_click(xpath="//button[span[text() = 'Ver']]", delay=1000):
-                        raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Ver) não localizado."])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Ver) não localizado."])
     
                     # Preencher campo 'Fim vigência' com o primeiro dia do mês seguinte ao atual
                     data_fim_vigencia = primeiro_dia_mes_seguinte()
                     xpath = "//*[@name= 'DT_FINAL_VIGENCIA']"
                     if not self.element_set_text(xpath=xpath, text=data_fim_vigencia, delay=1000):
-                        raise Exception(["Excecao_Sistema", mensagem_erro + "Campo (Data final de vigência) não localizado."])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Data final de vigência) não localizado."])
     
                     # Preencher campo 'Observação'
                     xpath = "//div[div[div[div[contains(text(),'Classificações do paciente')]]]]" \
@@ -99,7 +100,7 @@ class CadastroCompletoPessoas(Tasy):
                     # Verifica se salvou com sucesso
                     xpath = f"//div[div[div[div[div[span[text() = 'Classificações']]]]]]/div[4]/div[3]/div/div[{n + 1}]"
                     if not self.find_element(xpath, By.XPATH, ensure_visible=True):
-                        raise Exception(["Excecao_Sistema", mensagem_erro + "Não foi possível confirmar a atualização."])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível confirmar a atualização."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -119,19 +120,19 @@ class CadastroCompletoPessoas(Tasy):
             xpath = "//div[div[div[div[contains(text(), 'Classificações do paciente')]]]]" \
                     "//*[contains(text(), 'Adicionar')]"
             if not self.element_click(xpath=xpath):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Adicionar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Adicionar) não localizado."])
     
             # Informa a classificação
             xpath = "//div[div[span[text() = 'Classificação']]]/div[2]/tasy-listbox/div"
             self.element_click(xpath=xpath, delay=500)
             if not self.element_click(xpath=f"//a[span[text() = '{classificacao}']]", delay=500):
-                raise Exception(["Excecao_Negocio", mensagem_erro + f"Classificação ({classificacao}) não localizada."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Classificação ({classificacao}) não localizada."])
     
             # Preencher campo 'Início vigência'
             if data_inicio_vigencia != '':
                 xpath = "//*[@name= 'DT_INICIO_VIGENCIA']"
                 if not self.element_wait_displayed(xpath=xpath):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Campo (Início da vigência) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Início da vigência) não localizado."])
                 self.find_element(selector=xpath, by=By.XPATH).click()
                 self.type_keys(keys=[Keys.CONTROL, "a"])
                 self.kb_type(data_inicio_vigencia)
@@ -140,7 +141,7 @@ class CadastroCompletoPessoas(Tasy):
             if data_fim_vigencia != '':
                 xpath = "//*[@name= 'DT_FINAL_VIGENCIA']"
                 if not self.element_set_text(xpath=xpath, text=data_fim_vigencia, delay=1000):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Campo (Final vigência) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Final vigência) não localizado."])
     
             # Clica no botão 'Salvar'
             xpath = "//div[div[div[span[contains(text(), 'Salvar')]]] and contains(@class, 'enable')]"
@@ -151,7 +152,7 @@ class CadastroCompletoPessoas(Tasy):
             if self.find_element(xpath, By.XPATH, ensure_visible=True):
                 return
     
-            raise Exception(["Excecao_Sistema", mensagem_erro])
+            raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -169,21 +170,21 @@ class CadastroCompletoPessoas(Tasy):
             # Verifica se existe a classificação anterior
             xpath = f"//div[div[div[span[contains(text(),'{classif_anterior}')]]]]"
             if not self.find_element(xpath, By.XPATH):
-                raise Exception(["Excecao_Negocio", mensagem_erro + f"Classificação ({classif_anterior}) não localizada."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Classificação ({classif_anterior}) não localizada."])
     
             # Clica na linha da tabela
             self.find_element(xpath, By.XPATH, waiting_time=15000).click()
     
             # Clica em 'Ver'
             if not self.element_click(xpath="//button[span[text() = 'Ver']]", delay=1000):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Ver) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Ver) não localizado."])
     
             # Preencher campo 'Fim vigência' com a data de hoje
             data_atual = datetime.datetime.now()
             data_fim_vigencia = data_atual.strftime("%d%m%Y%H%M%S")
             xpath = "//*[@name= 'DT_FINAL_VIGENCIA']"
             if not self.element_set_text(xpath=xpath, text=data_fim_vigencia, delay=1000):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Campo (Data final de vigência) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Data final de vigência) não localizado."])
             data_fim_vigencia = data_atual.strftime("%d/%m/%Y %H:%M:%S")
     
             # Clica no botão 'Salvar'
@@ -192,14 +193,14 @@ class CadastroCompletoPessoas(Tasy):
                 self.find_element(xpath, By.XPATH, ensure_clickable=True).click()
             else:  # Se o botão 'Salvar' não estiver ativo, clicar em 'Fechar'
                 if not self.element_click("//button[span[contains(text(), 'Fechar')]]"):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Fechar) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Fechar) não localizado."])
     
             # Verifica se salvou com sucesso
             xpath = f"//div[div[div[span[contains(text(),'{data_fim_vigencia}')]]]]"
             if self.find_element(xpath, By.XPATH, ensure_visible=True):
                 return
     
-            raise Exception(["Excecao_Sistema", mensagem_erro])
+            raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)

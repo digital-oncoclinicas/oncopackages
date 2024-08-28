@@ -1,5 +1,4 @@
 from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, HEADLESS, LOG_EX_SISTEMA, LOG_EX_NEGOCIO
-from oncopackages.pastas_arquivos import pastas_arquivos
 from oncopackages.ferramentas.web_bot import WebBotOp
 from botcity.web.bot import ActionChains, By
 import urllib.parse
@@ -16,7 +15,7 @@ class Tasy(WebBotOp):
         self.download_folder_path = RPA_DIR_DOWNLOADS
 
         # Define o diretório do chromedriver.exe. Baixado do onco_packages
-        self.driver_path = pastas_arquivos.chrome_driver_path()
+        self.driver_path = self.chrome_driver_path()
 
     def login(self):
         """
@@ -220,7 +219,7 @@ class Tasy(WebBotOp):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Visualizar) não localizado."])
 
             # Esperar o download ser concluído
-            arquivo_baixado = pastas_arquivos.esperar_conclusao_download(self, timeout=60000)
+            arquivo_baixado = self.esperar_conclusao_download(timeout=60000)
 
             # Clica em 'Cancelar'
             if not self.element_click(xpath="//button[span[text()='Cancelar']]"):
@@ -231,7 +230,7 @@ class Tasy(WebBotOp):
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
-
+        
     def pesquisar_prontuario(self, prontuario: str, fechar_ccp: bool = False):
         """
         Realiza a pesquisa pelo prontuário do paciênte.
@@ -312,3 +311,69 @@ class Tasy(WebBotOp):
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
+
+    def pesquisar_atendimento(self, nr_atendimento: str):
+        """
+        Pesquisa pelo número do atendimento.
+        :param nr_atendimento: Número do atendimento.
+        """
+        mensagem_erro = "Falha ao pesquisar pelo atendimento no PEPA. "
+        try:
+            # Espera a tela carregar
+            xpath = "//span[text()='Agenda de consulta']"
+            if not self.find_element(xpath, By.XPATH, waiting_time=30000, ensure_clickable=True):
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão Pesquisar não localizado."])
+
+            # Se não for a primeira pesquisa, realizar o filtro a partir do campo atendimento da barra superior.
+            consulta_realizada = False
+            xpath = "//a[@class='btn inline-edit-link ng-scope']"
+            if self.find_element(xpath, By.XPATH, waiting_time=2000):
+                # Clica no desenho do lapis para editar o campo do atendimento
+                action = ActionChains(self.driver)
+                elemento = self.find_element(xpath, By.XPATH)
+                action.click(elemento).perform()
+                # Insere o atendimento:
+                try:
+                    xpath = "//div[span[text()='Atendimento']]/div/span/input"
+                    self.find_element(xpath, By.XPATH, ensure_visible=True).send_keys(nr_atendimento)
+                    self.enter()
+                    consulta_realizada = True
+                except:
+                    consulta_realizada = False
+
+            # Se for a primeira pesquisa ou não for possível realizar a pesquisa pelo método anterior,
+            # realizar o filtro a partir do botão com o símbolo da lupa.
+            xpath = "//a[@class='btn inline-edit-link ng-scope']"
+            if not self.find_element(xpath, By.XPATH, waiting_time=0) or consulta_realizada is False:
+                # Clicar no ícone de Pesquisar que fica no canto superior esquerdo
+                xpath = "//div[div[@class='person-icon-finder']]"
+                self.find_element(xpath, By.XPATH).click()
+
+                # Insere o número do atendimento no campo de pesquisa
+                xpath = "//input[@name='NR_ATENDIMENTO']"
+                self.find_element(xpath, By.XPATH, ensure_clickable=True).clear()
+                self.find_element(xpath, By.XPATH, ensure_clickable=True).send_keys(nr_atendimento)
+
+                # Clica no botão Filtrar
+                self.find_element("//button[contains(text(),'Filtrar')]", By.XPATH, ensure_clickable=True).click()
+
+                # Duplo click na primeira linha da tabela de resultados
+                if not self.element_double_click(xpath=f"//div[div/div/span[text()='{nr_atendimento}']]"):
+                    raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Atendimento ({nr_atendimento}) não localizado."])
+
+            # Esperar a tela do PEPA carregar
+            if not self.element_wait_displayed(xpath="//span[text()='Agenda de consulta']"):
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela do prontuário do paciente não localizada."])
+
+            # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
+            for i in range(8):
+                self.key_esc(wait=1000)
+
+            # Verifica se a tela carregou
+            if not self.find_element("//div[text() = 'Paciente']", By.XPATH, ensure_visible=True, waiting_time=2000):
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Popup de erro localizado após pesquisa."])
+
+        except Exception:
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            raise ValueError(error_message)
+

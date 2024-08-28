@@ -1,4 +1,4 @@
-from oncopackages.pastas_arquivos import pastas_arquivos
+from config import LOG_EX_NEGOCIO, LOG_EX_SISTEMA
 from oncopackages.tasy.tasy import Tasy
 from botcity.web.bot import By, Keys
 from datetime import datetime
@@ -17,7 +17,7 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Espera a tela carregar
             if not self.find_element("(//button[contains(text(), 'Ações do filtro')])[2]", By.XPATH, ensure_clickable=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Ações do filtro) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Ações do filtro) não localizado."])
             self.wait(1000)
     
             # Clicar no ícone de Filtro que fica no canto superior esquerdo
@@ -26,7 +26,7 @@ class AutorizacaoConvenio(Tasy):
     
             # Espera a tela carregar
             if not self.find_element("//button[contains(text(), 'Filtrar')]", By.XPATH, ensure_clickable=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de pesquisa não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de pesquisa não localizada."])
     
             # Insere a sequência da autorização no campo 'Autorização'
             xpath = "//input[@name='NR_SEQUENCIA']"
@@ -38,7 +38,7 @@ class AutorizacaoConvenio(Tasy):
     
             # Verificar se a autorização foi localizada
             if not self.find_element(f"//div[span='{seq_autorizacao}']", By.XPATH):
-                raise Exception(["Excecao_Negocio", mensagem_erro + "Autorização não localizada."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Autorização não localizada."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -57,7 +57,7 @@ class AutorizacaoConvenio(Tasy):
             # Verificar se aparece um popup com o título 'Confirmação'
             xpath = "//div[contains(text(), 'Deseja excluir o registro?')]"
             if not self.find_element(xpath, By.XPATH, waiting_time=3000, ensure_visible=True):
-                raise Exception(["Excecao_Negocio", mensagem_erro + "Exclusão negada pelo Tasy."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Exclusão negada pelo Tasy."])
     
             # Clica em 'Ok' no popup de confirmação
             xpath = "//button[contains(text(), 'Ok')]"
@@ -69,7 +69,7 @@ class AutorizacaoConvenio(Tasy):
                     return
                 self.wait(500)
     
-            raise Exception(["Excecao_Negocio", mensagem_erro + "Falha após confirmar a exclusão."])
+            raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Falha após confirmar a exclusão."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -85,7 +85,7 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Espera a tela carregar com a opção de Histórico
             if not self.find_element("//*[@id='pages']//*[@tab-tooltip='Histórico']", By.XPATH, ensure_clickable=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Menu Histórico localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Menu Histórico localizado."])
             self.wait(1000)
     
             # Clicar no Histórico no menu da lateral esquerda
@@ -95,7 +95,7 @@ class AutorizacaoConvenio(Tasy):
             # Espera aparecer Botão 'Adicionar' para Adicionar Histórico
             xpath = "(//button/span[contains(text(), 'Adicionar')])[2]"
             if not self.find_element(xpath, By.XPATH, ensure_clickable=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão de Adicionar não Localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão de Adicionar não Localizado."])
     
             # Clicar na opção 'Adicionar'
             self.find_element(xpath, By.XPATH, ensure_clickable=True).click()
@@ -103,7 +103,7 @@ class AutorizacaoConvenio(Tasy):
             # Espera a tela carregar a lista suspensa com o Tipo de Histórico
             xpath = "//div[input[@name='NR_SEQ_TIPO_HIST']]"
             if not self.find_element(xpath, By.XPATH, ensure_clickable=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Lista com os Tipo de Histórico não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Lista com os Tipo de Histórico não localizada."])
             self.wait(500)
     
             # Clica na lista suspensa com o Tipo de Histórico
@@ -111,12 +111,12 @@ class AutorizacaoConvenio(Tasy):
     
             # Verificar se a opção 'Informações Internas' está na lista suspensa
             if not self.element_click(xpath=f"//a/span[contains(text(), '{tipo_historico}')]", delay=1000):
-                raise Exception(["Excecao_Negocio", mensagem_erro + f"Tipo de histórico({tipo_historico}) não localizado."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Tipo de histórico({tipo_historico}) não localizado."])
     
             # Verificar se a área de digitar o texto com o histórico está disponível
             xpath = "//div//textarea[@name='DS_HISTORICO']"
             if not self.find_element(xpath, By.XPATH):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Campo para digitar o Histórico não localizado"])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo para digitar o Histórico não localizado"])
     
             # Preencher campo Histórico
             self.find_element(xpath, By.XPATH, ensure_clickable=True).send_keys(f"{historico}")
@@ -124,14 +124,14 @@ class AutorizacaoConvenio(Tasy):
             # Verificar se o botão de Salvar está disponível na tela
             xpath = "//div[div[div[div[span[text() = 'Histórico']]]]]//*/tasy-wbutton[@text='Salvar']"
             if not self.find_element(xpath, By.XPATH, ensure_clickable=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão Salvar não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão Salvar não localizado."])
     
             # Click em Salvar
             self.find_element(xpath, By.XPATH, ensure_clickable=True).click()
     
             # Espera o processamento concluir
             if not self.element_wait_displayed(xpath="//*[text() = 'Adicionar']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Não foi possível confirmar a inclusão do histórico."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível confirmar a inclusão do histórico."])
     
         except Exception:
             mensagem_erro = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -149,18 +149,18 @@ class AutorizacaoConvenio(Tasy):
             # Verifica se está na tela inicial da função "Autorização Convênio"
             if not self.element_wait_displayed(xpath="//*[contains(text(),'Relatórios')]"):
                 mensagem_erro += "Tela inicial da função Autorização Convênio não localizada."
-                raise Exception(["Excecao_Sistema", mensagem_erro])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
             # Acionar o atalho [F9] para acionar a tela de Alterar Estágio
             if autorizacao and not self.element_click(xpath=f"//div[div[div[span[text() = '{autorizacao}']]]]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Autorização não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Autorização não localizada."])
             self._key_fx(9)
     
             # Seleciona o Estágio
             xpath = "//div[div[div[div[span[text() = 'Alterar estágio']]]]]//div[input[@name='NR_SEQ_ESTAGIO']]"
             self.element_click(xpath=xpath, delay=1000)
             if not self.element_click(xpath=f"//a[span[contains(text(), '{nome_estagio}')]]", delay=500):
-                raise Exception(["Excecao_Negocio", f"Estágio ({nome_estagio}) não localizado."])
+                raise Exception([LOG_EX_NEGOCIO, f"Estágio ({nome_estagio}) não localizado."])
     
             # Selecionar o Motivo da Alteração de estágio caso a variável seja diferente de Null e o campo esteja habilitado
             xpath = "//div[input[@name='CD_MOTIVO_ESTAGIO'] and @class ='w-listbox w-listbox-dropdown']"
@@ -169,12 +169,12 @@ class AutorizacaoConvenio(Tasy):
                 self.element_click(xpath=xpath, delay=1000)
                 if not self.element_click(xpath=f"//a[span[contains(text(),'{motivo}')]]", delay=500):
                     mensagem_erro += f"Motivo ({motivo}) não localizado."
-                    raise Exception(["Excecao_Negocio", mensagem_erro])
+                    raise Exception([LOG_EX_NEGOCIO, mensagem_erro])
     
             # Clicar em OK
             xpath = "//button[span[contains(text(), 'OK')]]"
             if not self.find_element(xpath, By.XPATH, ensure_clickable=True, ensure_visible=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (OK) para alterar o estágio não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) para alterar o estágio não localizado."])
             self.find_element(xpath, By.XPATH, ensure_clickable=True, ensure_visible=True).click()
     
             # Verificar se aparece o popup de confirmação
@@ -188,7 +188,7 @@ class AutorizacaoConvenio(Tasy):
             else:
                 xpath = f"//span/span[contains(text(), '{nome_estagio}')]"
             if not self.find_element(xpath, By.XPATH):
-                raise Exception(["Excecao_Negocio", mensagem_erro + "Timeout ao confirmar a alteração."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Timeout ao confirmar a alteração."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -219,7 +219,7 @@ class AutorizacaoConvenio(Tasy):
     
             # Verificar se a alteração foi salva
             if not self.find_element("//span[text() = 'Ver']", By.XPATH, ensure_visible=True):
-                raise Exception(["Excecao_Negocio", mensagem_erro + "Timeout ao confirmar a alteração."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Timeout ao confirmar a alteração."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -253,12 +253,12 @@ class AutorizacaoConvenio(Tasy):
                     xpath = f"//div[div[div[span[text() = '{procedimento}']]]]"
                     if not self.element_left_click(xpath=xpath):
                         raise Exception(
-                            ["Excecao_Sistema", mensagem_erro + f"Procedimento ({procedimento}) não localizado."])
+                            [LOG_EX_SISTEMA, mensagem_erro + f"Procedimento ({procedimento}) não localizado."])
     
                     # Clica no desenho de um lapis no fim da linha do procedimento selecionado
                     if not self.element_left_click(xpath="//a[@id='_inlineEdit']"):
                         raise Exception(
-                            ["Excecao_Sistema", mensagem_erro + f"Botão para editar o procedimento não localizado."])
+                            [LOG_EX_SISTEMA, mensagem_erro + f"Botão para editar o procedimento não localizado."])
     
                     # Preenche o campo 'Quantidade autorizada'
                     self.find_element("//input[@name='QT_AUTORIZADA']", By.XPATH).clear()
@@ -266,14 +266,14 @@ class AutorizacaoConvenio(Tasy):
     
                     # Clica em 'Salvar'
                     if not self.element_click(xpath="//button[text() = 'Salvar']"):
-                        raise Exception(["Excecao_Negocio", mensagem_erro + "Botão (Salvar) não localizado."])
+                        raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Botão (Salvar) não localizado."])
     
                     # Confirma a alteração
                     xpath = (f"//div[div[div[span[text() = '{procedimento}' or text() = '{proc_interno}']]]]"
                              f"/div/div/span[text()='{qt_autorizada}']")
                     if not self.find_element(xpath, By.XPATH):
                         mensagem_erro += f"Timeout ao confirmar a alteração do procedimento ({procedimento})."
-                        raise Exception(["Excecao_Sistema", mensagem_erro])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
                     # Se não houver essa espera o Tasy apresenta falha ao salvar
                     self.wait(2000)
@@ -295,7 +295,7 @@ class AutorizacaoConvenio(Tasy):
             # Clica no botão adicionar
             if not self.element_click(xpath="//*[contains(text(), 'Adicionar')]"):
                 mensagem_erro += f"Botão (Adicionar) não localizado."
-                raise Exception(["Excecao_Sistema", mensagem_erro])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
             # Insere o procedimento interno no campo 'Procedimento'
             xpath = "//input[@name='NR_SEQ_PROC_INTERNO']"
@@ -311,7 +311,7 @@ class AutorizacaoConvenio(Tasy):
                 self.wait(500)
             if nome_procedimento == "":
                 mensagem_erro += f"Procedimento não reconhecido pelo Tasy."
-                raise Exception(["Excecao_Negocio", mensagem_erro])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro])
     
             # Preenche o campo 'Quantidade solicitada'
             self.find_element("//input[@name='QT_SOLICITADA']", By.XPATH).clear()
@@ -335,7 +335,7 @@ class AutorizacaoConvenio(Tasy):
                      f"/div/div/span[text()='{qt_autorizada}']")
             if not self.find_element(xpath, By.XPATH):
                 mensagem_erro += f"Timeout ao confirmar a adição do procedimento."
-                raise Exception(["Excecao_Sistema", mensagem_erro])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
             # Se não houver essa espera o Tasy apresenta falha ao salvar
             self.wait(2000)
@@ -357,14 +357,14 @@ class AutorizacaoConvenio(Tasy):
             # Espera a tela carregar
             xpath = "//span[text() = 'Material TUSS']"
             if not self.element_wait_displayed(xpath=xpath, tentativas=10):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de materiais não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de materiais não localizada."])
     
             # Aumenta o número de autorizações que são visualizadas na tabela. Ele pode n existir, por isso não tem raise.
             xpath = "//tasy-listbox[contains(@class, 'ng-isolate-scope')]"
             if self.element_click(xpath=xpath, tentativas=2):
                 xpath = "//a[span[text() = 'Todos']]"
                 if not self.element_click(xpath=xpath):
-                    raise Exception(["Excecao_Sistema", mensagem_erro + "Opção (Todos) não localizada."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Todos) não localizada."])
     
             # Pegar a quantidade de linhas da tabela de materiais
             xpath = "//i[@id = 'totalRecordsPageFinish']"
@@ -386,12 +386,12 @@ class AutorizacaoConvenio(Tasy):
                     xpath = f"//div[div[div[div[div[span[text() = 'Material TUSS']]]]]]/div[5]/div[3]/div/" \
                             f"div[@data-row-idx='{linha}']"
                     if not self.element_left_click(xpath=xpath):
-                        raise Exception(["Excecao_Sistema", mensagem_erro + f"Linha do material não localizada."])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Linha do material não localizada."])
     
                     # Clica no desenho de um lapis no fim da linha do material selecionado
                     if not self.element_left_click(xpath="//a[@id='_inlineEdit']"):
                         raise Exception(
-                            ["Excecao_Sistema", mensagem_erro + f"Botão para editar o material não localizado."])
+                            [LOG_EX_SISTEMA, mensagem_erro + f"Botão para editar o material não localizado."])
     
                     # Preenche o campo 'Quantidade autorizada' com a quantidade solicitada
                     xpath = "//input[@name='QT_AUTORIZADA']"
@@ -411,7 +411,7 @@ class AutorizacaoConvenio(Tasy):
                             break
                         self.wait(500)
                     if qt_autorizada != qt_solicitada:
-                        raise Exception(["Excecao_Sistema", mensagem_erro + f"Timeout ao confirmar a atualização."])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Timeout ao confirmar a atualização."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -427,12 +427,12 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Clicar na aba 'Anexos'
             if not self.element_click(xpath="//div[span[text() = 'Anexos']]", delay=1000):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Aba (Anexos) não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba (Anexos) não localizada."])
     
             # Espera a tela carregar
             xpath = "//span[text() = 'Arquivo']"
             if not self.find_element(xpath, By.XPATH, ensure_visible=True):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de anexos não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de anexos não localizada."])
     
             # Pegar a quantidade de arquivos antes de realizar o upload
             xpath = "(//i[@id = 'totalRecordsPageFinish'])[2]"
@@ -440,12 +440,12 @@ class AutorizacaoConvenio(Tasy):
     
             # Clica no botão 'Adicionar'
             if not self.element_click("//*[contains(text(), 'Adicionar')]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Adicionar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Adicionar) não localizado."])
     
             # Seleciona o 'Tipo de anexo'
             self.element_click("//div[input[@name='NR_SEQ_TIPO']]")
             if not self.element_click(f"//a[span[contains(text(),'{tipo_anexo}')]]"):
-                raise Exception(["Excecao_Negocio", mensagem_erro + f"Tipo de anexo ({tipo_anexo}) não localizado."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Tipo de anexo ({tipo_anexo}) não localizado."])
     
             self.upload_arquivo_background(
                 xpath_upload="//*[@id='DS_ARQUIVO']",
@@ -467,7 +467,7 @@ class AutorizacaoConvenio(Tasy):
                     break
                 self.wait(500)
             if not qt_arquivos_depois > qt_arquivos_antes:
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Timeout ao confirmar o upload do anexo."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Timeout ao confirmar o upload do anexo."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -498,24 +498,24 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Clica no botão 'Adicionar'
             if not self.element_click(xpath="//*[contains(text(), 'Adicionar')]", delay=1000):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Adicionar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Adicionar) não localizado."])
     
             # Pega o valor do campo 'Sequência'
             autorizacao = self.element_get_value("//*[@name= 'NR_SEQUENCIA']")
             if autorizacao == '':
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de edição da nova autorização não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de edição da nova autorização não localizada."])
     
             # Preenche o campo 'Tipo de autorização'
             if tipo_autorizacao != '':
                 self.element_click(xpath="//div[input[@name='IE_TIPO_AUTORIZACAO']]", delay=1000)
                 if not self.element_click(xpath=f"//a[span[text()='{tipo_autorizacao}']]", delay=250):
                     mensagem_erro += f"Tipo de autorização ({tipo_autorizacao}) não localizado."
-                    raise Exception(["Excecao_Negocio", mensagem_erro])
+                    raise Exception([LOG_EX_NEGOCIO, mensagem_erro])
     
             # Preenche o campo 'Convênio'
             self.element_click("//div[input[@name='CD_CONVENIO']]")
             if not self.element_click(xpath=f"//a[span[text()='{convenio}']]", delay=250):
-                raise Exception(["Excecao_Negocio", mensagem_erro + f"Convênio ({convenio}) não localizado."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Convênio ({convenio}) não localizado."])
     
             # Preenche o campo 'Data prevista'
             if data_prevista != '':
@@ -532,7 +532,7 @@ class AutorizacaoConvenio(Tasy):
                 self.wait(500)
             if nm_medico == '':
                 mensagem_erro += f"Médico solicitante ({medico_solicitante}) não localizado."
-                raise Exception(["Excecao_Negocio", mensagem_erro])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro])
     
             # Preenche o campo 'Procedimento'
             if procedimento != '':
@@ -544,7 +544,7 @@ class AutorizacaoConvenio(Tasy):
                 self.element_click("//button[contains(text(),'Filtrar')]")
                 # Espera o procedimento aparecer na tabela de resultados
                 if not self.element_wait_displayed(f"//div[span[text()='{procedimento}']]"):
-                    raise Exception(["Excecao_Negocio", mensagem_erro + f"Procedimento ({procedimento}) não localizado."])
+                    raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Procedimento ({procedimento}) não localizado."])
                 self.element_click("//button[span[text()='Ok']]")
                 # Espera o Tasy trazer a descrição do medicamento
                 ds_procedimento = ''
@@ -554,7 +554,7 @@ class AutorizacaoConvenio(Tasy):
                         break
                     self.wait(500)
                 if ds_procedimento == '':
-                    raise Exception(["Excecao_Negocio", mensagem_erro + f"Procedimento ({procedimento}) não localizado."])
+                    raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Procedimento ({procedimento}) não localizado."])
     
             # Preenche o campo 'Dias autorizados'
             if dias_autorizados != '':
@@ -570,12 +570,12 @@ class AutorizacaoConvenio(Tasy):
     
             # Clica no botão 'Salvar'
             if not self.element_click("//*[@text = 'Salvar']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Salvar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Salvar) não localizado."])
     
             # Verifica se salvou com sucesso
             if not self.element_wait_displayed(xpath=f"//span[text() = '{autorizacao}']", tentativas=60):
                 mensagem_erro += "Não foi possível confirmar a adição da nova autorização."
-                raise Exception(["Excecao_Sistema", mensagem_erro])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
             return autorizacao
     
@@ -595,12 +595,12 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Clica com o botão direito do mouse na linha referente a autorização da tabela de autorizações
             if not self.element_right_click(f"//div[div[div[span[text() = '{autorizacao}']]]]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Autorização não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Autorização não localizada."])
     
             # Clica no item "Vincular -> Atendimento" da lista suspensa
             self.element_click("//*[text()='Vincular']")
             if not self.element_click("//div[text()='Atendimento']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Menu (Vincular -> Atendimento) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Menu (Vincular -> Atendimento) não localizado."])
     
             # Alterar a quantidade de linhas por página para 'Todas' se houver várias páginas
             xpath = "//div[div[div[div[span[text()='Vincular atendimento']]]]]//div[div[a[*[*[text()='---']]]]]"
@@ -618,7 +618,7 @@ class AutorizacaoConvenio(Tasy):
                     break
                 self.page_down()
             if not self.find_element(xpath, By.XPATH):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Atendimento não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Atendimento não localizada."])
     
             # Seleciona o atendimento e clica em "OK"
             self.find_element(xpath, By.XPATH).click()
@@ -629,7 +629,7 @@ class AutorizacaoConvenio(Tasy):
             if self.element_wait_displayed(xpath=xpath):
                 return
     
-            raise Exception(["Excecao_Sistema", mensagem_erro + "Não foi possível confirmar o vínculo do atendimento."])
+            raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível confirmar o vínculo do atendimento."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -647,31 +647,31 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Seleciona a autorização na tabela de autorizações
             if not self.element_click(f"//div[div[div[span[text() = '{autorizacao}']]]]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Autorização não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Autorização não localizada."])
     
             # Clica no menu "Relatórios -> Configurações"
             self.element_click("//button[span[text()='Relatórios']]")
             if not self.element_click("//div[text()='Configurações']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Menu 'Relatórios -> Configurações' não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Menu 'Relatórios -> Configurações' não localizado."])
     
             # Preenche o campo 'Código'
             if not self.element_set_text("//input[@name='CD_RELATORIO']", cate):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de pesquisa não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de pesquisa não localizada."])
     
             # Clica em 'Filtrar'
             if not self.element_click("//button[contains(text(),'Filtrar')]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Filtrar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Filtrar) não localizado."])
     
             # Clica em 'Visualizar'
             if not self.element_click("//button[span[text()='Visualizar']]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Visualizar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Visualizar) não localizado."])
     
             # Esperar o download ser concluído
-            arquivo_baixado = pastas_arquivos.esperar_conclusao_download(bot=self, timeout=180000)
+            arquivo_baixado = self.esperar_conclusao_download(timeout=180000)
     
             # Clica em 'Cancelar'
             if not self.element_click("//button[span[text()='Cancelar']]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Cancelar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Cancelar) não localizado."])
     
             return arquivo_baixado
     
@@ -688,11 +688,11 @@ class AutorizacaoConvenio(Tasy):
         try:
             # Seleciona a autorização na tabela de autorizações
             if not self.element_double_click(f"//div[div[div[span[text() = '{autorizacao}']]]]", delay=1000):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Autorização não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Autorização não localizada."])
     
             # Espera a tela carregar
             if not self.element_wait_displayed("//div[contains(text(), 'Autorização procedimento')]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela com dados da autorização não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela com dados da autorização não localizada."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -709,7 +709,7 @@ class AutorizacaoConvenio(Tasy):
     
             # Espera a tela carregar
             if not self.element_wait_displayed(xpath="//div[contains(text(), 'Autorizações')]"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Tela de autorizações não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de autorizações não localizada."])
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -722,10 +722,10 @@ class AutorizacaoConvenio(Tasy):
         mensagem_erro = 'Falha ao limpar o filtro de autorizações.'
         try:
             if not self.element_click(xpath="//button[text()='Ações do filtro']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Ações do filtro) não encontrado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Ações do filtro) não encontrado."])
     
             if not self.element_click(xpath="//div[text()='Limpar filtros']"):
-                raise Exception(["Excecao_Sistema", mensagem_erro + "Botão (Limpar filtros) não encontrado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Limpar filtros) não encontrado."])
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
