@@ -9,6 +9,9 @@ class WebBotOp(WebBot):
     def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__()
 
+        self.bd_tasy = bd_tasy
+        self.bd_rpa = bd_rpa
+
         # Define se o navegador vai ficar visível ou não
         self.headless = HEADLESS
 
@@ -17,9 +20,6 @@ class WebBotOp(WebBot):
 
         # Define o diretório do chromedriver.exe. Baixado do onco_packages
         self.driver_path = self.chrome_driver_path()
-        
-        self.bd_tasy = bd_tasy
-        self.bd_rpa = bd_rpa
 
     def search_element(self, xpath: str, waiting_time: int = 15, delay: int = 0):
         """
