@@ -110,7 +110,7 @@ def chrome_driver_path():
     """
     error_messagem = 'Falha capturar o endereço do chromedriver.exe. '
     try:
-        pasta_arquivos = sys.prefix + r"\Lib\site-packages\onco_packages\chrome_driver"
+        pasta_arquivos = sys.prefix + r"\Lib\site-packages\oncopackages\chrome_driver"
         for arquivo in os.listdir(pasta_arquivos):
             if "chromedriver" in arquivo and arquivo.endswith(".exe"):
                 dir_chromedriver = os.path.join(pasta_arquivos, arquivo)
