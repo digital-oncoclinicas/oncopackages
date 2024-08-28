@@ -1,10 +1,23 @@
+from config import RPA_DIR_DOWNLOADS, HEADLESS, LOG_EX_SISTEMA, LOG_EX_NEGOCIO
 from botcity.web.bot import ActionChains, WebBot, By
-from config import LOG_EX_SISTEMA
+import shutil
+import sys
+import os
 
 
 class WebBotOp(WebBot):
     def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__()
+
+        # Define se o navegador vai ficar visível ou não
+        self.headless = HEADLESS
+
+        # Define a pasta usada para salvar os downloads
+        self.download_folder_path = RPA_DIR_DOWNLOADS
+
+        # Define o diretório do chromedriver.exe. Baixado do onco_packages
+        self.driver_path = self.chrome_driver_path()
+        
         self.bd_tasy = bd_tasy
         self.bd_rpa = bd_rpa
 
@@ -187,36 +200,35 @@ class WebBotOp(WebBot):
     def esperar_conclusao_download(self, extensao_arquivo: str = '.pdf', timeout: int = 30000) -> str:
         """
         Espera a conclusão do download do arquivo e retorna o diretório completo dele.
-        :param bot: Objeto da BotCity.
         :param extensao_arquivo: Formato do arquivo que será baixado. Exemplo: .pdf, .png, .xlsx...
         :param timeout: tempo máximo de espera pela conclusão do download.
         :return: Diretório completo do arquivo baixado.
         """
         try:
             # Conta a quantidade de arquivos na pasta de downloads com a mesma extensão do arquivo que será baixado
-            qt_arquivos_antes = bot.get_file_count(file_extension=extensao_arquivo)
+            qt_arquivos_antes = self.get_file_count(file_extension=extensao_arquivo)
 
             # Espera a conclusão do download por até timeout segundos
             qt_arquivos_apos = 0
             for i in range(int(timeout / 500)):
-                qt_arquivos_apos = bot.get_file_count(file_extension=extensao_arquivo)
+                qt_arquivos_apos = self.get_file_count(file_extension=extensao_arquivo)
                 if qt_arquivos_apos > qt_arquivos_antes:
                     break
-                bot.wait(500)
+                self.wait(500)
 
             if qt_arquivos_apos <= qt_arquivos_antes:
                 raise Exception([LOG_EX_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
 
             # Pega o diretório completo do arquivo baixado
-            dir_arquivo = bot.get_last_created_file(path=RPA_DIR_DOWNLOADS)
+            dir_arquivo = self.get_last_created_file(path=RPA_DIR_DOWNLOADS)
 
             return dir_arquivo
 
         except Exception:
-            error_message = salvar_log_erro(f"Falha ao esperar a conclusão do download.", bot)
+            error_message = self.bd_rpa.salvar_log_erro(f"Falha ao esperar a conclusão do download.", self)
             raise ValueError(error_message)
 
-    def chrome_driver_path():
+    def chrome_driver_path(self):
         """
         Retorna o endereço completo do chromedriver.exe.
         """
@@ -236,6 +248,6 @@ class WebBotOp(WebBot):
             raise Exception([LOG_EX_SISTEMA, error_messagem + "Chromedriver.exe não localizado."])
 
         except Exception:
-            error_message = salvar_log_erro(error_messagem)
+            error_message = self.bd_rpa.salvar_log_erro(error_messagem)
             raise ValueError(error_message)
 

@@ -1,4 +1,4 @@
-from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, HEADLESS, LOG_EX_SISTEMA, LOG_EX_NEGOCIO
+from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, LOG_EX_SISTEMA, LOG_EX_NEGOCIO
 from oncopackages.ferramentas.web_bot import WebBotOp
 from botcity.web.bot import ActionChains, By
 import urllib.parse
@@ -7,15 +7,6 @@ import urllib.parse
 class Tasy(WebBotOp):
     def __init__(self, bd_rpa, bd_tasy=None):
         super().__init__(bd_rpa, bd_tasy)
-
-        # Define se o navegador vai ficar visível ou não
-        self.headless = HEADLESS
-
-        # Define a pasta usada para salvar os downloads
-        self.download_folder_path = RPA_DIR_DOWNLOADS
-
-        # Define o diretório do chromedriver.exe. Baixado do onco_packages
-        self.driver_path = self.chrome_driver_path()
 
     def login(self):
         """
