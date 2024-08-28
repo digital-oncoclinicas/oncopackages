@@ -1,5 +1,5 @@
 from botcity.web.bot import ActionChains, WebBot, By
-from config import EXCECAO_SISTEMA
+from config import LOG_EX_SISTEMA
 
 
 class WebBotOp(WebBot):
@@ -179,7 +179,7 @@ class WebBotOp(WebBot):
                 if self.find_element(xpath_confirmacao, By.XPATH, waiting_time=timeout, ensure_clickable=True):
                     return True
     
-                raise Exception([EXCECAO_SISTEMA, error_message + 'Confirmação do upload não encontrada.'])
+                raise Exception([LOG_EX_SISTEMA, error_message + 'Confirmação do upload não encontrada.'])
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(error_message)
             raise ValueError(error_message)

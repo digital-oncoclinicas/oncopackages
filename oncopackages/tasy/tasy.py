@@ -1,4 +1,4 @@
-from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, HEADLESS, EXCECAO_SISTEMA, EXCECAO_NEGOCIO
+from config import RPA_DIR_DOWNLOADS, TASY_URL, TASY_USER, TASY_PWD, HEADLESS, LOG_EX_SISTEMA, LOG_EX_NEGOCIO
 from oncopackages.pastas_arquivos import pastas_arquivos
 from oncopackages.ferramentas.web_bot import WebBotOp
 from botcity.web.bot import ActionChains, By
@@ -45,10 +45,10 @@ class Tasy(WebBotOp):
 
             # Verificar se a senha está errada
             if self.find_element("//*[contains(text(), 'Usuário ou senha inválido.')]", By.XPATH, waiting_time=0):
-                raise Exception([EXCECAO_NEGOCIO, mensagem_erro + "Usuário ou senha inválido."])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Usuário ou senha inválido."])
 
             # Reportar falha genérica
-            raise Exception([EXCECAO_SISTEMA, mensagem_erro])
+            raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -84,7 +84,7 @@ class Tasy(WebBotOp):
             # Clicar no item da lista suspensa desejado
             xpath = f"//a/span[text()='{estabelecimento}']"
             if not self.element_click(xpath, tentativas=10, delay=500):
-                raise Exception([EXCECAO_NEGOCIO, mensagem_erro + f'Estabelecimento ({estabelecimento}) não localizado.'])
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f'Estabelecimento ({estabelecimento}) não localizado.'])
 
             # Clicar em 'Ok'
             self.find_element("//button[contains(text(), 'Ok')]", By.XPATH).click()
@@ -120,7 +120,7 @@ class Tasy(WebBotOp):
             # Clicar na função
             xpath = f"//a/span[contains(text(), '{tasy_funcao}')]"
             if not self.element_click(xpath=xpath):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + f"Função ({tasy_funcao}) não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Função ({tasy_funcao}) não localizada."])
 
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -135,11 +135,11 @@ class Tasy(WebBotOp):
         try:
             # Clica em fechar a função
             if not self.element_click(xpath=f"//div[span[text()='{nome_funcao}']]/button"):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + f"Função ({nome_funcao}) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Função ({nome_funcao}) não localizado."])
 
             # Aguarda a tela carregar
             if not self.find_element("Funções", By.LINK_TEXT, ensure_visible=True, ensure_clickable=True):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + f"Função ({nome_funcao}) não encerrada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Função ({nome_funcao}) não encerrada."])
 
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -177,7 +177,7 @@ class Tasy(WebBotOp):
                 self.wait(500)
 
             if qt_arquivos_apos <= qt_arquivos_antes:
-                raise Exception([EXCECAO_SISTEMA, f'Timeout ao baixar o arquivo ({nome_arquivo}) do Tasy.'])
+                raise Exception([LOG_EX_SISTEMA, f'Timeout ao baixar o arquivo ({nome_arquivo}) do Tasy.'])
 
             # Pega o diretório completo do arquivo baixado
             dir_arquivo = self.get_last_created_file(path=RPA_DIR_DOWNLOADS)
@@ -201,30 +201,30 @@ class Tasy(WebBotOp):
             # Clica no menu "Relatórios -> Configurações"
             self.element_click(xpath="//button[span[text()='Relatórios']]", delay=500)
             if not self.element_click(xpath="//div[text()='Configurações']"):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Menu (Relatórios -> Configurações) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Menu (Relatórios -> Configurações) não localizado."])
 
             # Preenche o campo 'Código'
             if not self.element_set_text(xpath="//input[@name='CD_RELATORIO']", text=codigo_relatorio, delay=500):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Tela de pesquisa não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de pesquisa não localizada."])
 
             # Clica em 'Filtrar'
             if not self.element_click(xpath="//button[contains(text(),'Filtrar')]", delay=500):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Botão (Filtrar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Filtrar) não localizado."])
 
             # Clica na linha referente ao CATE pesquisado
             if not self.element_click(xpath=f"//div[div[div[span[text()='{codigo_relatorio}']]]]", delay=500):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + f"Relatório ({codigo_relatorio}) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Relatório ({codigo_relatorio}) não localizado."])
 
             # Clica em 'Visualizar'
             if not self.element_click(xpath="//button[span[text()='Visualizar']]", delay=500):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Botão (Visualizar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Visualizar) não localizado."])
 
             # Esperar o download ser concluído
             arquivo_baixado = pastas_arquivos.esperar_conclusao_download(self, timeout=60000)
 
             # Clica em 'Cancelar'
             if not self.element_click(xpath="//button[span[text()='Cancelar']]"):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Botão (Cancelar) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Cancelar) não localizado."])
 
             return arquivo_baixado
 
@@ -243,7 +243,7 @@ class Tasy(WebBotOp):
             # Espera o desenho da lupa que fica no canto superior esquerdo aparecer
             xpath = "//div[@class='person-icon-finder']"
             if not self.find_element(xpath, By.XPATH):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Botão (Localizar paciente) não localizado."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Localizar paciente) não localizado."])
 
             # Se não for a primeira pesquisa, realizar o filtro a partir do campo 'Código' da barra superior.
             consulta_realizada = False
@@ -266,32 +266,32 @@ class Tasy(WebBotOp):
             if consulta_realizada is False:
                 # Clicar no ícone de Pesquisar que fica no canto superior esquerdo
                 if not self.element_click("//div[div[@class='person-icon-finder']]"):
-                    raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Icone de pesquisa (Luga) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Icone de pesquisa (Luga) não localizado."])
 
                 # Ativa a aba 'Pessoa'
                 if not self.element_click("//div[span[text()='Pessoa']]"):
-                    raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Aba 'Pessoa' não localizada."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba 'Pessoa' não localizada."])
 
                 # Insere o número do prontuário no campo de pesquisa
                 if not self.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario):
-                    raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Campo 'Código' não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo 'Código' não localizado."])
 
                 # Clica no botão Filtrar
                 if not self.element_click(xpath="//button[contains(text(),'Filtrar')]", delay=500):
-                    raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Botão (Filtrar) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Filtrar) não localizado."])
 
                 # Espera o prontuário aparecer na tabela de resultados
                 if not self.element_wait_displayed(f"//div[div/div/span[text()='{prontuario}']]"):
-                    raise Exception([EXCECAO_NEGOCIO, mensagem_erro + "Prontuario não localizado."])
+                    raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Prontuario não localizado."])
 
                 # Clica no botão 'Ok'
                 if not self.element_click("//button[span[text() = 'Ok']]"):
-                    raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Botão (Ok) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Ok) não localizado."])
 
                 if fechar_ccp:
                     # Espera a tela da função "Cadastro Completo de Pessoa" carregar
                     if not self.element_wait_displayed("//*[text() = 'Todos complementos']"):
-                        raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
 
                     # Clica no botão 'Ok' caso apareça algum popup com o título 'Informação'
                     self.element_click("//button[text() = 'Ok']", tentativas=4)
@@ -300,11 +300,11 @@ class Tasy(WebBotOp):
                     xpath = "//div[span[text()='Cadastro Completo de Pessoas']]/button"
                     if not self.element_click(xpath=xpath):
                         mensagem_erro += "Não foi possível encerrar a função (Cadastro Completo de Pessoa)."
-                        raise Exception([EXCECAO_SISTEMA, mensagem_erro])
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
             # Verifica se a pesquisa retornou o prontuário desejado
             if not self.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
-                raise Exception([EXCECAO_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
 
             # Clica no botão 'Fechar' caso apareça algum popup de alerta apareça
             self.element_click("//button[span[text()='Fechar']]", tentativas=6)

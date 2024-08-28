@@ -1,5 +1,5 @@
-from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, EXCECAO_SISTEMA,
-                    EXCECAO_NEGOCIO, RPA_DIR_PRINT)
+from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, LOG_EX_SISTEMA,
+                    LOG_EX_NEGOCIO, RPA_DIR_PRINT)
 from botcity.web import WebBot
 import pyodbc
 import socket
@@ -71,7 +71,7 @@ class BancoDadosRpa:
         error_message = str(exc_value)
 
         # Verificar se error_message é um erro do código ou um erro mapeado
-        if EXCECAO_SISTEMA in error_message or EXCECAO_NEGOCIO in error_message:  # Erro mapeado
+        if LOG_EX_SISTEMA in error_message or LOG_EX_NEGOCIO in error_message:  # Erro mapeado
             # Transformar a string em lista e verificar se o erro veio de uma task filha
             error_message = eval(error_message)
             if len(error_message) == 2:  # Erro na task atual/mãe
@@ -81,7 +81,7 @@ class BancoDadosRpa:
                 error_seq = error_message[2]
         else:  # Erro não mapeado
             error_seq = self.__gerar_sequencia_erro(task_name, error_line, error_message)
-            error_message = [EXCECAO_SISTEMA, task_error_message, error_seq]
+            error_message = [LOG_EX_SISTEMA, task_error_message, error_seq]
 
         # Print de tela caso o objeto bot != None
         if bot and bot.capabilities:

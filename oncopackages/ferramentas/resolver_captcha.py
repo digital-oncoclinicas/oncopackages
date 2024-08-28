@@ -61,7 +61,7 @@ def recaptcha_v3_proxyless(site_url: str, site_key: str) -> str:
         else:
             # print("task finished with error " + solver.error_code)
             # print("task finished with error " + solver.err_string)
-            raise Exception([config.EXCECAO_SISTEMA, mensagem_erro + solver.error_code + ":" + solver.err_string])
+            raise Exception([config.LOG_EX_SISTEMA, mensagem_erro + solver.error_code + ":" + solver.err_string])
 
     except Exception:
         error_message = salvar_log_erro(mensagem_erro)

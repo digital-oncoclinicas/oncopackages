@@ -1,4 +1,4 @@
-from config import RPA_DIR_PRINT, RPA_DIR_DOWNLOADS, EXCECAO_SISTEMA
+from config import RPA_DIR_PRINT, RPA_DIR_DOWNLOADS, LOG_EX_SISTEMA
 from oncopackages.banco_dados.rpa import salvar_log_erro
 from botcity.web import WebBot
 from datetime import datetime
@@ -92,7 +92,7 @@ def esperar_conclusao_download(bot: WebBot, extensao_arquivo: str = '.pdf', time
             bot.wait(500)
 
         if qt_arquivos_apos <= qt_arquivos_antes:
-            raise Exception([EXCECAO_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
+            raise Exception([LOG_EX_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
 
         # Pega o diretório completo do arquivo baixado
         dir_arquivo = bot.get_last_created_file(path=RPA_DIR_DOWNLOADS)
@@ -121,7 +121,7 @@ def chrome_driver_path():
                 shutil.move(caminho_completo, dir_chromedriver)
                 return dir_chromedriver
 
-        raise Exception([EXCECAO_SISTEMA, error_messagem + "Chromedriver.exe não localizado."])
+        raise Exception([LOG_EX_SISTEMA, error_messagem + "Chromedriver.exe não localizado."])
 
     except Exception:
         error_message = salvar_log_erro(error_messagem)
