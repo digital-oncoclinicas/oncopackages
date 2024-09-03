@@ -473,25 +473,13 @@ class AutorizacaoConvenio(Tasy):
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
             raise ValueError(error_message)
     
-    def adicionar_autorizacao(self,
-                              convenio: str,
-                              medico_solicitante: str,
-                              data_prevista: str = '',
-                              tipo_autorizacao: str = '',
-                              procedimento: str = '',
-                              dias_autorizados: str = '',
-                              observacao: str = '',
-                              indicacao_clinica: str = '') -> str:
+    def adicionar_autorizacao(
+            self, convenio: str, medico_solicitante: str, data_prevista: str = '', tipo_autorizacao: str = '',
+            procedimento: str = '', dias_autorizados: str = '', observacao: str = '', indicacao_clinica: str = '',
+            guia_prestador: str = '', guia_operadora: str = '', numero_protocolo: str = '', senha: str = ''
+    ) -> str:
         """
         Adicionar nova autorização no Tasy.
-        :param convenio: Convênio;
-        :param data_prevista: Data prevista;
-        :param medico_solicitante: Médico solicitante;
-        :param tipo_autorizacao: Tipo de autorização;
-        :param procedimento: Procedimento interno;
-        :param dias_autorizados: Dias autorizados;
-        :param observacao: Observação;
-        :param indicacao_clinica: Indicação clínica.
         :return: Sequência da nova autorização.
         """
         mensagem_erro = "Falha ao adicionar nova autorização. "
@@ -516,6 +504,22 @@ class AutorizacaoConvenio(Tasy):
             self.element_click("//div[input[@name='CD_CONVENIO']]")
             if not self.element_click(xpath=f"//a[span[text()='{convenio}']]", delay=250):
                 raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Convênio ({convenio}) não localizado."])
+
+            # Preenche o campo 'Gui Prestador'
+            if guia_prestador != '':
+                self.element_set_text("//*[@name= 'CD_AUTORIZACAO_PREST']", guia_prestador)
+
+            # Preenche o campo 'Gui operadora'
+            if guia_operadora != '':
+                self.element_set_text("//*[@name= 'CD_AUTORIZACAO']", guia_operadora)
+
+            # Preenche o campo 'Numero de protocolo'
+            if numero_protocolo != '':
+                self.element_set_text("//*[@name= 'CD_SENHA_PROVISORIA']", numero_protocolo)
+
+            # Preenche o campo 'Senha'
+            if senha != '':
+                self.element_set_text("//*[@name= 'CD_SENHA']", senha)
     
             # Preenche o campo 'Data prevista'
             if data_prevista != '':
