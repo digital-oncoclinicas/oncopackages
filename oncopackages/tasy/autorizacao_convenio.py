@@ -338,7 +338,7 @@ class AutorizacaoConvenio(Tasy):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
             # Se não houver essa espera o Tasy apresenta falha ao salvar
-            self.wait(2000)
+            self.wait(4000)
     
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
@@ -527,7 +527,7 @@ class AutorizacaoConvenio(Tasy):
     
             # Preenche o campo 'Médico solicitante'
             self.element_set_text("//*[@name= 'CD_MEDICO_SOLICITANTE']", medico_solicitante)
-            self.tab()
+            self.type_keys([Keys.SHIFT, Keys.TAB])
             nm_medico = ''
             for n in range(20):
                 nm_medico = self.element_get_value("//input[@name='txDescription']")
