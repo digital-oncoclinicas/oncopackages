@@ -263,7 +263,7 @@ class Tasy(WebBotOp):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba 'Pessoa' não localizada."])
 
                 # Insere o número do prontuário no campo de pesquisa
-                if not self.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario):
+                if not self.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario, delay=500):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo 'Código' não localizado."])
 
                 # Clica no botão Filtrar
@@ -292,13 +292,13 @@ class Tasy(WebBotOp):
                         mensagem_erro += "Não foi possível encerrar a função (Cadastro Completo de Pessoa)."
                         raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
-            # Verifica se a pesquisa retornou o prontuário desejado
-            if not self.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
-                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
-
             # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
             for i in range(6):
                 self.key_esc(wait=1000)
+
+            # Verifica se a pesquisa retornou o prontuário desejado
+            if not self.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
+                raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
 
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
