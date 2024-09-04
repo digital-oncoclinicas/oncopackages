@@ -290,7 +290,6 @@ class AutorizacaoConvenio(Tasy):
         :param qt_autorizada: Quantidade autorizada;
         """
         mensagem_erro = f"Falha ao adicionar o procedimentos ({cd_procedimento_interno}). "
-    
         try:
             # Clica no botão adicionar
             if not self.element_click(xpath="//*[contains(text(), 'Adicionar')]"):
@@ -485,7 +484,7 @@ class AutorizacaoConvenio(Tasy):
         mensagem_erro = "Falha ao adicionar nova autorização. "
         try:
             # Clica no botão 'Adicionar'
-            if not self.element_click(xpath="//*[contains(text(), 'Adicionar')]", delay=1000):
+            if not self.element_click(xpath="//*[contains(text(), 'Adicionar')]", tentativas=30, delay=1000):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Adicionar) não localizado."])
     
             # Pega o valor do campo 'Sequência'
@@ -593,9 +592,7 @@ class AutorizacaoConvenio(Tasy):
         :param autorizacao: Sequência da autorização;
         :param atendimento: Número do atendimento.
         """
-    
         mensagem_erro = "Falha ao vincular atendimento. "
-    
         try:
             # Clica com o botão direito do mouse na linha referente a autorização da tabela de autorizações
             if not self.element_right_click(f"//div[div[div[span[text() = '{autorizacao}']]]]"):
@@ -647,7 +644,6 @@ class AutorizacaoConvenio(Tasy):
         :return: Diretório completo do relatório CATE baixado.
         """
         mensagem_erro = f"Falha ao gerar relatório CATE-{cate}. "
-    
         try:
             # Seleciona a autorização na tabela de autorizações
             if not self.element_click(f"//div[div[div[span[text() = '{autorizacao}']]]]"):

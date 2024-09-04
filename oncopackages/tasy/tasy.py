@@ -296,8 +296,9 @@ class Tasy(WebBotOp):
             if not self.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de resultado da pesquisa não localizada."])
 
-            # Clica no botão 'Fechar' caso apareça algum popup de alerta apareça
-            self.element_click("//button[span[text()='Fechar']]", tentativas=6)
+            # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
+            for i in range(6):
+                self.key_esc(wait=1000)
 
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
