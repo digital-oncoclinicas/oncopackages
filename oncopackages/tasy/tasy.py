@@ -256,7 +256,7 @@ class Tasy(WebBotOp):
             if consulta_realizada is False:
                 # Clicar no ícone de Pesquisar que fica no canto superior esquerdo
                 if not self.element_click("//div[div[@class='person-icon-finder']]"):
-                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Icone de pesquisa (Luga) não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Ícone de pesquisa (Lupa) não localizado."])
 
                 # Ativa a aba 'Pessoa'
                 if not self.element_click("//div[span[text()='Pessoa']]", delay=1000):

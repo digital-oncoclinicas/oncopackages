@@ -475,7 +475,8 @@ class AutorizacaoConvenio(Tasy):
     def adicionar_autorizacao(
             self, convenio: str, medico_solicitante: str, data_prevista: str = '', tipo_autorizacao: str = '',
             procedimento: str = '', dias_autorizados: str = '', observacao: str = '', indicacao_clinica: str = '',
-            guia_prestador: str = '', guia_operadora: str = '', numero_protocolo: str = '', senha: str = ''
+            guia_prestador: str = '', guia_operadora: str = '', numero_protocolo: str = '', senha: str = '',
+            data_envio: str = '', data_retorno: str = '', data_fim_vigencia: str = '', data_validade_guia: str = ''
     ) -> str:
         """
         Adicionar nova autorização no Tasy.
@@ -520,9 +521,25 @@ class AutorizacaoConvenio(Tasy):
             if senha != '':
                 self.element_set_text("//*[@name= 'CD_SENHA']", senha)
     
+            # Preenche o campo 'Data envio'
+            if data_envio != '':
+                self.element_set_text("//*[@name= 'DT_ENVIO']", data_envio)
+
+            # Preenche o campo 'Data retorno'
+            if data_retorno != '':
+                self.element_set_text("//*[@name= 'DT_RETORNO']", data_retorno)
+
+            # Preenche o campo 'Fim vigência'
+            if data_fim_vigencia != '':
+                self.element_set_text("//*[@name= 'DT_FIM_VIGENCIA']", data_fim_vigencia)
+
             # Preenche o campo 'Data prevista'
             if data_prevista != '':
                 self.element_set_text("//*[@name= 'DT_ENTRADA_PREVISTA']", data_prevista)
+
+            # Preenche o campo 'Data de validade da guia'
+            if data_validade_guia != '':
+                self.element_set_text("//*[@name= 'DT_VALIDADE_GUIA']", data_validade_guia)
     
             # Preenche o campo 'Médico solicitante'
             self.element_set_text("//*[@name= 'CD_MEDICO_SOLICITANTE']", medico_solicitante)
