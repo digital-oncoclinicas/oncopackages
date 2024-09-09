@@ -42,7 +42,7 @@ class WebBotOp(WebBot):
 
         raise Exception(f"Elemento ({xpath}) não localizado.")
         
-    def element_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
+    def element_click(self, xpath: str, tentativas: int = 15, delay: int = 0) -> bool:
         """
         Espera o elemento aparecer e clica nele.
         :param xpath: XPATH do elemento;
@@ -50,12 +50,19 @@ class WebBotOp(WebBot):
         :param delay: Tempo de espera antes de clicar.
         :return: True - Se conseguiu clicar no elemento. False se não.
         """
-        try:
-            elemento = self.search_element(xpath, tentativas, delay)
-            elemento.click()
-            return True
-        except:
-            return False
+        for n in range(tentativas):
+            try:
+                elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
+                for elemento in elementos:
+                    if elemento.is_displayed():
+                        self.wait(delay)
+                        elemento.click()
+                        return True
+            except:
+                pass
+            self.wait(1000)
+
+        return False
 
     def element_left_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
         """
