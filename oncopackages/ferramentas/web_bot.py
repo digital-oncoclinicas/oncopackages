@@ -72,13 +72,20 @@ class WebBotOp(WebBot):
         :param delay: Tempo de espera antes de clicar.
         :return: True - Se conseguiu clicar no elemento. False se não.
         """
-        try:
-            elemento = self.search_element(xpath, tentativas, delay)
-            action = ActionChains(self.driver)
-            action.click(elemento).perform()
-            return True
-        except:
-            return False
+        for n in range(tentativas):
+            try:
+                elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
+                for elemento in elementos:
+                    if elemento.is_displayed():
+                        self.wait(delay)
+                        action = ActionChains(self.driver)
+                        action.click(elemento).perform()
+                        return True
+            except:
+                pass
+            self.wait(1000)
+
+        return False
 
     def element_right_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
         """
@@ -88,13 +95,20 @@ class WebBotOp(WebBot):
         :param delay: Tempo de espera antes de clicar.
         :return: True - Se conseguiu clicar no elemento. False se não.
         """
-        try:
-            elemento = self.search_element(xpath, tentativas, delay)
-            action = ActionChains(self.driver)
-            action.context_click(elemento).perform()
-            return True
-        except:
-            return False
+        for n in range(tentativas):
+            try:
+                elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
+                for elemento in elementos:
+                    if elemento.is_displayed():
+                        self.wait(delay)
+                        action = ActionChains(self.driver)
+                        action.context_click(elemento).perform()
+                        return True
+            except:
+                pass
+            self.wait(1000)
+
+        return False
     
     def element_double_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
         """
@@ -104,13 +118,20 @@ class WebBotOp(WebBot):
         :param delay: Tempo de espera antes de clicar.
         :return: True - Se conseguiu clicar no elemento. False se não.
         """
-        try:
-            elemento = self.search_element(xpath, tentativas, delay)
-            action = ActionChains(self.driver)
-            action.double_click(elemento).perform()
-            return True
-        except:
-            return False
+        for n in range(tentativas):
+            try:
+                elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
+                for elemento in elementos:
+                    if elemento.is_displayed():
+                        self.wait(delay)
+                        action = ActionChains(self.driver)
+                        action.double_click(elemento).perform()
+                        return True
+            except:
+                pass
+            self.wait(1000)
+
+        return False
     
     def element_get_text(self, xpath: str, tentativas: int = 30, delay: int = 0) -> str:
         """
@@ -149,13 +170,20 @@ class WebBotOp(WebBot):
         :param delay: Tempo de espera antes de setar o texto.
         :return: True - Se conseguiu inserir o texto no elemento. False se não.
         """
-        try:
-            elemento = self.search_element(xpath, tentativas, delay)
-            elemento.clear()
-            elemento.send_keys(text)
-            return True
-        except:
-            return False
+        for n in range(tentativas):
+            try:
+                elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
+                for elemento in elementos:
+                    if elemento.is_displayed():
+                        self.wait(delay)
+                        elemento.clear()
+                        elemento.send_keys(text)
+                        return True
+            except:
+                pass
+            self.wait(1000)
+
+        return False
 
     def element_wait_displayed(self, xpath: str, tentativas: int = 30) -> bool:
         """
