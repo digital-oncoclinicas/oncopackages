@@ -64,7 +64,7 @@ class WebBotOp(WebBot):
 
         return False
 
-    def element_left_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
+    def element_left_click(self, xpath: str, tentativas: int = 15, delay: int = 0) -> bool:
         """
         Espera o elemento aparecer e clica nele com o botão esquerdo do mouse.
         :param xpath: XPATH do elemento;
@@ -87,7 +87,7 @@ class WebBotOp(WebBot):
 
         return False
 
-    def element_right_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
+    def element_right_click(self, xpath: str, tentativas: int = 15, delay: int = 0) -> bool:
         """
         Espera o elemento aparecer e clica nele com o botão direito do mouse.
         :param xpath: XPATH do elemento;
@@ -110,7 +110,7 @@ class WebBotOp(WebBot):
 
         return False
     
-    def element_double_click(self, xpath: str, tentativas: int = 30, delay: int = 0) -> bool:
+    def element_double_click(self, xpath: str, tentativas: int = 15, delay: int = 0) -> bool:
         """
         Espera o elemento aparecer e dá um duplo click nele.
         :param xpath: XPATH do elemento;
@@ -133,7 +133,7 @@ class WebBotOp(WebBot):
 
         return False
     
-    def element_get_text(self, xpath: str, tentativas: int = 30, delay: int = 0) -> str:
+    def element_get_text(self, xpath: str, tentativas: int = 15, delay: int = 0) -> str:
         """
         Espera o elemento aparecer e pega o atributo 'text' dele.
         :param xpath: XPATH do elemento;
@@ -147,7 +147,7 @@ class WebBotOp(WebBot):
         except:
             return ''
     
-    def element_get_value(self, xpath: str, tentativas: int = 30, delay: int = 0) -> str:
+    def element_get_value(self, xpath: str, tentativas: int = 15, delay: int = 0) -> str:
         """
         Espera o elemento aparecer e pega o atributo 'value' dele.
         :param xpath: XPATH do elemento;
@@ -161,7 +161,7 @@ class WebBotOp(WebBot):
         except:
             return ''
     
-    def element_set_text(self, xpath: str, text: str, tentativas: int = 30, delay: int = 0) -> bool:
+    def element_set_text(self, xpath: str, text: str, tentativas: int = 15, delay: int = 0) -> bool:
         """
         Espera o elemento aparecer e insere o valor da variável 'text'.
         :param xpath: XPATH do elemento;
@@ -185,7 +185,7 @@ class WebBotOp(WebBot):
 
         return False
 
-    def element_wait_displayed(self, xpath: str, tentativas: int = 30) -> bool:
+    def element_wait_displayed(self, xpath: str, tentativas: int = 15) -> bool:
         """
         Espera o elemento aparecer ficar visível.
         :param xpath: XPATH do elemento;
