@@ -260,11 +260,11 @@ class Tasy(WebBotOp):
 
                 # Ativa a aba 'Pessoa'
                 if not self.element_click("//div[span[text()='Pessoa']]", delay=1000):
-                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba 'Pessoa' não localizada."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba (Pessoa) não localizada."])
 
                 # Insere o número do prontuário no campo de pesquisa
                 if not self.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario, delay=1000):
-                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo 'Código' não localizado."])
+                    raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Código) não localizado."])
 
                 # Clica no botão Filtrar
                 if not self.element_click(xpath="//button[contains(text(),'Filtrar')]", delay=500):
