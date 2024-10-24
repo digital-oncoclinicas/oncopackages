@@ -1,11 +1,13 @@
 from config import LOG_EX_NEGOCIO, LOG_EX_SISTEMA
+from banco_dados_tasy import BancoDadosTasy
+from banco_dados_rpa import BancoDadosRpa
 from oncopackages.tasy.tasy import Tasy
 from botcity.web.bot import By
 import re
 
 
 class ContaPaciente(Tasy):
-    def __init__(self, bd_rpa, bd_tasy=None):
+    def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
         super().__init__(bd_rpa, bd_tasy)
 
     def pesquisar_conta(self, nr_conta: str) -> None:
@@ -18,34 +20,34 @@ class ContaPaciente(Tasy):
         try:
             # Valida se a tela de filtro de pesquisa pela conta carregou corretamente
             xpath = f"//button[contains(text(),'Filtrar')]"
-            if not self.find_element(xpath, By.XPATH, ensure_visible=True, ensure_clickable=True):
+            if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True, ensure_clickable=True):
                 try:
                     # Clicar no ícone de Filtro que fica no canto superior esquerdo
                     xpath = f"//tasy-wlabel[@uib-tooltip='Filtros em uso (Ctrl + Alt + F)'][@tooltip-append-to-body='true']"
-                    self.find_element(xpath, By.XPATH, ensure_clickable=True, ensure_visible=True).click()
+                    self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, ensure_visible=True).click()
                 except:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Filtro pesquisar conta não localizado."])
 
             # Verifica se o campo de pesquisa da conta paciente está disponível na tela
-            if not self.find_element(xpath, By.XPATH, ensure_clickable=True, ensure_visible=True):
+            if not self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, ensure_visible=True):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo inserir o número da conta não localizado."])
 
             # Insere o Número da conta no campo de pesquisa
             xpath = "//input[@name='NR_INTERNO_CONTA']"
-            if not self.element_set_text(xpath=xpath, text=nr_conta, delay=1000):
+            if not self.bot.element_set_text(xpath=xpath, text=nr_conta, delay=1000):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Número da conta) não localizado."])
 
             # Clica no botão de 'filtro'
             xpath = f"//button[contains(text(),'Filtrar')]"
-            self.find_element(xpath, By.XPATH, ensure_visible=True, ensure_clickable=True).click()
+            self.bot.find_element(xpath, By.XPATH, ensure_visible=True, ensure_clickable=True).click()
 
             # Valida se a pesquisa retornou a conta
             xpath = f"//div[span[text()='{nr_conta}']]"
-            if not self.find_element(xpath, By.XPATH, ensure_visible=True):
+            if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não foi localizada."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def acessar_conta(self, conta: str) -> None:
@@ -57,18 +59,18 @@ class ContaPaciente(Tasy):
         try:
             # Clica para ativar a linha da canta na tabela.
             xpath = f"//div[span[text()='{conta}']]"
-            if not self.element_click(xpath=xpath, delay=1000):
+            if not self.bot.element_click(xpath=xpath, delay=1000):
                 raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Conta ({conta}) não localizada."])
 
             # Duplo click para acessar a conta
-            self.element_double_click(xpath=xpath, delay=1000)
+            self.bot.element_double_click(xpath=xpath, delay=1000)
 
             # Valido carregamento da tela de detalhes da conta
-            if not self.element_wait_displayed(xpath="//span[contains(text(), 'Procedimentos')]"):
+            if not self.bot.element_wait_displayed(xpath="//span[contains(text(), 'Procedimentos')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de detalhes da conta não localizada."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def substituir_guia(self, conta: str, guia: str) -> None:
@@ -82,30 +84,30 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao substituir a guia da conta. "
         try:
             # Click com o botão direito na primeira linha da tabela de contas
-            if not self.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
+            if not self.bot.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não localizada."])
 
             # Clica na opção 'Substituir guia'
-            if not self.element_click(xpath="//div[text()='Substituir guia']", tentativas=4):
+            if not self.bot.element_click(xpath="//div[text()='Substituir guia']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (substituir guia) não localizada."])
 
             # Aguarda a tela carregar
-            if not self.element_set_text(xpath="//input[@name='NR_NOVA_GUIA']", text=guia):
+            if not self.bot.element_set_text(xpath="//input[@name='NR_NOVA_GUIA']", text=guia):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up (Substituir guia) não localizado."])
 
             # Clica em 'Ok'
-            self.element_click(xpath="//button[span[contains(text(),'OK')]]")
+            self.bot.element_click(xpath="//button[span[contains(text(),'OK')]]")
 
             # Valida se a guia foi substituída com sucesso
             for n in range(10):  # Verificar se a guia aparece na tabela
-                if not self.element_wait_displayed(xpath=f"//span[text()='Substituir guia']", tentativas=1):
+                if not self.bot.element_wait_displayed(xpath=f"//span[text()='Substituir guia']", tentativas=1):
                     return
-                self.wait(500)
+                self.bot.wait(500)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível validar a substituição."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def substituir_senha(self, conta: str, senha: str, substituir_todas: bool = False) -> None:
@@ -120,44 +122,44 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao substituir a senha da conta. "
         try:
             # Click com o botão direito na linha da conta
-            if not self.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
+            if not self.bot.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não localizada."])
 
             # Clica na opção 'Substituir senha'
-            if not self.element_click(xpath="//div[text()='Substituir senha']", tentativas=4):
+            if not self.bot.element_click(xpath="//div[text()='Substituir senha']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Substituir senha) não localizada."])
 
             # Aguarda pop-up 'Substituir senha' carregar
-            if not self.element_wait_displayed(xpath="//input[@name='DS_NOVA_SENHA']"):
+            if not self.bot.element_wait_displayed(xpath="//input[@name='DS_NOVA_SENHA']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up (Substituir senha) não localizado."])
 
             # Flega o check-box 'Substituir todas'
             if substituir_todas:
-                if not self.element_click(xpath="//div[input[@name='IE_SUBSTITUIR']]"):
+                if not self.bot.element_click(xpath="//div[input[@name='IE_SUBSTITUIR']]"):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Checkbox (Substituir todas) não localizado."])
             else:
                 # Insere a Senha
-                self.element_set_text(xpath="//input[@name='DS_SENHA']", text=senha)
-                self.tab()
+                self.bot.element_set_text(xpath="//input[@name='DS_SENHA']", text=senha)
+                self.bot.tab()
 
             # Insere a Nova Senha
-            self.element_set_text(xpath="//input[@name='DS_NOVA_SENHA']", text=senha)
-            self.tab()
+            self.bot.element_set_text(xpath="//input[@name='DS_NOVA_SENHA']", text=senha)
+            self.bot.tab()
 
             # Clica em 'Ok'
-            if not self.element_click(xpath="//button[span[contains(text(),'OK')]]"):
+            if not self.bot.element_click(xpath="//button[span[contains(text(),'OK')]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Valida se a senha foi substituída com sucesso
             for n in range(10):  # Verificar se a senha aparece na tabela
-                if not self.element_wait_displayed(xpath=f"//span[text()='Substituir senha']", tentativas=1):
+                if not self.bot.element_wait_displayed(xpath=f"//span[text()='Substituir senha']", tentativas=1):
                     return
-                self.wait(500)
+                self.bot.wait(500)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível validar a substituição."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def recalcular_conta(self, conta: str) -> None:
@@ -170,32 +172,32 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao recalcular a conta do paciente. "
         try:
             # Click com o botão direito na linha da conta
-            if not self.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
+            if not self.bot.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não localizada."])
 
             # Clicar em 'Recalcular conta'
-            if not self.element_click(xpath="//div[text()='Recalcular conta']", tentativas=4):
+            if not self.bot.element_click(xpath="//div[text()='Recalcular conta']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Recalcular conta) não localizada."])
 
             # Aguardar o pop-up de confirmação
             xpath = "//div[text()='Conta atualizada com sucesso!']"
-            if not self.find_element(xpath, By.XPATH, 15000, ensure_visible=True):
+            if not self.bot.find_element(xpath, By.XPATH, 15000, ensure_visible=True):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up de confirmação não localizado."])
 
             # Clica em 'Ok'
-            if not self.element_click(xpath="//button[span[contains(text(),'OK')]]"):
+            if not self.bot.element_click(xpath="//button[span[contains(text(),'OK')]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Valida se retornou para a tela inicial
             for n in range(10):
-                if not self.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
+                if not self.bot.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
                     return
-                self.wait(500)
+                self.bot.wait(500)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível validar a atualização."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def atualizar_conta_tiss(self, conta: str) -> None:
@@ -208,31 +210,31 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao atualizar a conta TISS. "
         try:
             # Click com o botão direito na linha da conta
-            if not self.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
+            if not self.bot.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não localizada."])
 
             # Clica na opção 'Atualizar conta TISS'
-            if not self.element_click(xpath="//div[text()='Atualizar conta TISS']", tentativas=4):
+            if not self.bot.element_click(xpath="//div[text()='Atualizar conta TISS']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Atualizar conta TISS) não localizada."])
 
             # Aguarda pop-up de confirmação
-            if not self.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']"):
+            if not self.bot.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up de confirmação não localizado."])
 
             # Clica em 'Ok'
-            if not self.element_click(xpath="//button[text()='Ok']"):
+            if not self.bot.element_click(xpath="//button[text()='Ok']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Valida se retornou para a tela inicial
             for n in range(10):
-                if not self.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
+                if not self.bot.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
                     return
-                self.wait(500)
+                self.bot.wait(500)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível validar a atualização."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def fechar_atendimento(self, conta: str) -> None:
@@ -245,34 +247,34 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao mudar status da conta. "
         try:
             # Click com o botão direito na linha da conta
-            if not self.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
+            if not self.bot.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não localizada."])
 
             # Clica na opção 'Fechar atendimento'
-            if not self.element_click(xpath="//div[text()='Fechar atendimento']", tentativas=4):
+            if not self.bot.element_click(xpath="//div[text()='Fechar atendimento']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Fechar atendimento) não localizada."])
 
             # Aguardar o pop-up de confirmação
             xpath = fr"//div[text()='Confirma o final do atendimento?']"
-            if not self.find_element(xpath, By.XPATH, ensure_visible=True):
+            if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True):
                 raise Exception([LOG_EX_SISTEMA, "Pop-up de confirmação não localizado."])
 
             # Clica em 'Ok'
-            if not self.element_click(xpath="//button[text()='Ok']"):
+            if not self.bot.element_click(xpath="//button[text()='Ok']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Aguardar o popup de 'Consistência' (demora bastante)
             xpath = fr"//div[@title='Consistência']"
-            if not self.find_element(xpath, By.XPATH, ensure_visible=True, waiting_time=60000):
+            if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True, waiting_time=60000):
                 raise Exception([LOG_EX_SISTEMA, "Popup (Consistência) não localizada."])
 
             # Verificar se possuí alguma inconsistência na tabela de Consistências
-            inconsistencia = self.verificar_tabela_consistencia()
+            inconsistencia = self.bot.verificar_tabela_consistencia()
             if inconsistencia:
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + inconsistencia])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def mudar_status_conta(self, conta) -> None:
@@ -285,51 +287,50 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao mudar o status da conta. "
         try:
             # Click com o botão direito na linha da conta
-            if not self.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
+            if not self.bot.element_right_click(xpath=f"//div[span[text()='{conta}']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Conta não localizada."])
 
             # Clica na opção 'Muda status conta'
-            if not self.element_click(xpath="//div[text()='Muda status conta']", tentativas=4):
+            if not self.bot.element_click(xpath="//div[text()='Muda status conta']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Muda status conta) não localizada."])
 
             # Verificar se aparece o pop-up de inconsistência
-            # ToDo: Analisar esse popup
-            if self.element_wait_displayed(xpath="//div[contains(text(),'Inconsistências')]", tentativas=6):
-                raise Exception([LOG_EX_NEGOCIO, "Tipo de saída da guia de consulta não informado."])
+            if self.bot.element_wait_displayed(xpath="//div[contains(text(),'Inconsistências')]", tentativas=6):
+                raise Exception([LOG_EX_NEGOCIO, "Popup (Inconsistências) encontrado."])
 
             # Aguardar o popup de 'Consistência' (demora bastante)
             xpath = "//div[@title='Consistência']"
-            if not self.find_element(xpath, By.XPATH, ensure_visible=True, waiting_time=60000):
+            if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True, waiting_time=60000):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Popup (Consistência) não localizada."])
 
             # Verificar se possuí alguma inconsistência na tabela de Consistências
-            incosistencia = self.verificar_tabela_consistencia()
+            incosistencia = self.bot.verificar_tabela_consistencia()
 
             # Clica em 'Ok'
             xpath = "//div[@class='region-cel' and //div[@title='Consistência']]//button[span[text()='OK']]"
-            if not self.element_click(xpath=xpath):
+            if not self.bot.element_click(xpath=xpath):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             if incosistencia:
                 # Duplo click na linha referente a conta
-                self.acessar_conta(conta=conta)
+                self.bot.acessar_conta(conta=conta)
 
                 # Adicionar etapa na conta
-                self.adicionar_etapa(etapa="RPA", observacoes=incosistencia)
+                self.bot.adicionar_etapa(etapa="RPA", observacoes=incosistencia)
 
                 # Reportar exceção de negócio
                 raise Exception([LOG_EX_NEGOCIO, mensagem_erro + incosistencia])
 
             # Valida se retornou para a tela inicial
             for n in range(10):
-                if not self.element_wait_displayed(xpath="//div[@title='Consistência']", tentativas=1):
+                if not self.bot.element_wait_displayed(xpath="//div[@title='Consistência']", tentativas=1):
                     return
-                self.wait(500)
+                self.bot.wait(500)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Não foi possível validar a mudança."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def inserir_conta_protocolo(self, identificador_protocolo: str) -> None:
@@ -342,37 +343,37 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao inserir a conta no protocolo. "
         try:
             # Aguarda o carregamento do pop-up de inserir no protocolo
-            if not self.element_wait_displayed(xpath="//span[text()='Inserir no protocolo']"):
+            if not self.bot.element_wait_displayed(xpath="//span[text()='Inserir no protocolo']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up (Inserir no protocolo) não localizado."])
 
             # Preencher o campo 'Nome'
-            self.element_click(xpath="//div[input[@name='NR_PROTOCOLO']]", delay=1000)
-            if not self.element_click(xpath=f"//a[span[contains(text(),'{identificador_protocolo}')]]", delay=250):
+            self.bot.element_click(xpath="//div[input[@name='NR_PROTOCOLO']]", delay=1000)
+            if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{identificador_protocolo}')]]", delay=250):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Protocolo não localizado."])
 
             # Clica em 'Ok'
-            if not self.element_click(xpath="//button[span[contains(text(),'OK')]]"):
+            if not self.bot.element_click(xpath="//button[span[contains(text(),'OK')]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Após clicar em 'Ok', aparece um segundo popup de confirmação. Clica em 'Ok' novamente
-            if not self.element_click(xpath="//button[text()='Ok']"):
+            if not self.bot.element_click(xpath="//button[text()='Ok']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up de Confirmação não foi localizado."])
 
             # A conta foi inserida com sucesso se aparecer o popup 'Atenção' com a quantidade de contas no protocolo
-            if self.element_wait_displayed(xpath="//div[text()='Atenção']"):
+            if self.bot.element_wait_displayed(xpath="//div[text()='Atenção']"):
                 # Clica em 'Ok'
-                self.element_click(xpath="//button[text()='Ok']")
+                self.bot.element_click(xpath="//button[text()='Ok']")
                 return
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=4):
+            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=4):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
-                mensagem_erro += self.element_get_text(xpath=xpath)
+                mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def verificar_tabela_consistencia(self) -> str:
@@ -384,7 +385,7 @@ class ContaPaciente(Tasy):
         try:
             # Pega a quantidade de linhas na tabela de consistências
             xpath = "//div[div[div[div[div[span[text()='Consistência']]]]]]//i[@id='totalRecordsPageFinish']"
-            qt_registros = self.element_get_text(xpath=xpath)
+            qt_registros = self.bot.element_get_text(xpath=xpath)
             qt_registros = int(re.sub(r"[^0-9]", "", qt_registros)) + 1
 
             # Xpath tabela
@@ -398,7 +399,7 @@ class ContaPaciente(Tasy):
 
                 # Pega o valor da coluna 'FC'
                 xpath = f"({xpath_tabela})[{num_linha}]/div/div/div[{num_coluna}]"
-                fc = self.find_element(xpath, By.XPATH, ensure_visible=True).text
+                fc = self.bot.find_element(xpath, By.XPATH, ensure_visible=True).text
 
                 # Reportar o erro se o valor da coluna 'FC' for diferente de 'Sim'
                 if fc != 'Sim':
@@ -407,7 +408,7 @@ class ContaPaciente(Tasy):
 
                     # Pega o valor da coluna 'Inconsistência'
                     xpath = f"({xpath_tabela})[{num_linha}]/div/div/div[{num_coluna}]"
-                    inconsistencia = self.find_element(xpath, By.XPATH, ensure_visible=True).text
+                    inconsistencia = self.bot.find_element(xpath, By.XPATH, ensure_visible=True).text
 
                     # Reportar a inconsistência
                     return inconsistencia
@@ -415,7 +416,7 @@ class ContaPaciente(Tasy):
             return ""
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def adicionar_etapa(self, etapa: str, observacoes: str) -> None:
@@ -429,40 +430,40 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao adicionar etapa na conta do paciente. "
         try:
             # Clica na aba 'Etapa conta'
-            if not self.element_click(xpath="//div[span[text()='Etapas conta']]"):
+            if not self.bot.element_click(xpath="//div[span[text()='Etapas conta']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Menu (Etapas conta) não localizado."])
 
             # Clica no botão 'Adicionar'
-            if not self.element_click(xpath="//*[span[text()='Adicionar']]"):
+            if not self.bot.element_click(xpath="//*[span[text()='Adicionar']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Adicionar) não foi localizado."])
 
             # Preenche o campo 'Etapa'
-            self.element_click(xpath="//div[input[@name='NR_SEQ_ETAPA']]")
-            if not self.element_click(xpath=f"//a[span[contains(text(),'{etapa}')]]", delay=250):
+            self.bot.element_click(xpath="//div[input[@name='NR_SEQ_ETAPA']]")
+            if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{etapa}')]]", delay=250):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Etapa ({etapa}) não localizada."])
 
             # Preenche o campo 'Observações'
-            self.element_set_text(xpath="//*[@name='DS_OBSERVACAO']", text=observacoes)
-            self.tab()
+            self.bot.element_set_text(xpath="//*[@name='DS_OBSERVACAO']", text=observacoes)
+            self.bot.tab()
 
             # Clica no botão 'Salvar'
-            if not self.element_left_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
+            if not self.bot.element_left_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Salvar) não localizado."])
 
             # Verificar se salvou com sucesso
             xpath = "//div[div[span[contains(text(),'Setor')]] and div[span[text()='Básica']]]"
-            if self.element_wait_displayed(xpath=xpath):
+            if self.bot.element_wait_displayed(xpath=xpath):
                 return
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
-                mensagem_erro += self.element_get_text(xpath=xpath)
+                mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def adicionar_conta(self, convenio: str, categoria: str = '', categoria_calculo: str = '') -> str:
@@ -476,14 +477,14 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao adicionar uma nova conta na função Conta Paciente. "
         try:
             # Clica em 'Adicionar'
-            if not self.element_click(xpath="//*[contains(text(),'Adicionar')]", delay=1000):
+            if not self.bot.element_click(xpath="//*[contains(text(),'Adicionar')]", delay=1000):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Botão (Adicionar) não localizado."])
 
             # Pega a nova conta
-            conta = self.element_get_value(xpath="//input[@name='NR_INTERNO_CONTA']")
+            conta = self.bot.element_get_value(xpath="//input[@name='NR_INTERNO_CONTA']")
             # conta = ""
             # for n in range(20):
-            #     conta = self.element_get_value(xpath="//input[@name='NR_INTERNO_CONTA']")
+            #     conta = self.bot.element_get_value(xpath="//input[@name='NR_INTERNO_CONTA']")
             #     if conta != "":
             #         break
             #     bot.wait(500)
@@ -491,43 +492,43 @@ class ContaPaciente(Tasy):
             #     raise Exception([LOG_EX_SISTEMA, error_manager + "Conta não gerada."])
 
             # Preenche o campo 'Convênio'
-            convenio_atual = self.element_get_text(xpath="//div[input[@name='CD_CONVENIO_PARAMETRO']]")
+            convenio_atual = self.bot.element_get_text(xpath="//div[input[@name='CD_CONVENIO_PARAMETRO']]")
             if convenio != convenio_atual:
-                self.element_click(xpath="//div[input[@name='CD_CONVENIO_PARAMETRO']]")
-                if not self.element_click(xpath=f"//a[span[contains(text(),'{convenio}')]]", delay=250):
+                self.bot.element_click(xpath="//div[input[@name='CD_CONVENIO_PARAMETRO']]")
+                if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{convenio}')]]", delay=250):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Convênio ({convenio}) não localizado."])
 
             # Preenche o campo 'Categoria'
-            categoria_atual = self.element_get_text(xpath="//div[input[@name='CD_CATEGORIA_PARAMETRO']]")
+            categoria_atual = self.bot.element_get_text(xpath="//div[input[@name='CD_CATEGORIA_PARAMETRO']]")
             if categoria != "" and categoria != categoria_atual:
-                self.element_click(xpath="//div[input[@name='CD_CATEGORIA_PARAMETRO']]")
-                if not self.element_click(xpath=f"//a[span[contains(text(),'{categoria}')]]", delay=250):
+                self.bot.element_click(xpath="//div[input[@name='CD_CATEGORIA_PARAMETRO']]")
+                if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{categoria}')]]", delay=250):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Categoria ({categoria}) não localizada."])
 
             # Preenche o campo 'Categoria cálculo'
-            categoria_calculo_atual = self.element_get_text(xpath="//div[input[@name='CD_CATEGORIA_CALCULO']]")
+            categoria_calculo_atual = self.bot.element_get_text(xpath="//div[input[@name='CD_CATEGORIA_CALCULO']]")
             if categoria_calculo != "" and categoria_calculo != categoria_calculo_atual:
-                self.element_click(xpath="//div[input[@name='CD_CATEGORIA_CALCULO']]")
-                if not self.element_click(xpath=f"//a[span[contains(text(),'{categoria_calculo}')]]", delay=250):
+                self.bot.element_click(xpath="//div[input[@name='CD_CATEGORIA_CALCULO']]")
+                if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{categoria_calculo}')]]", delay=250):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Categoria cálculo ({categoria_calculo}) não localizada."])
 
             # Clica no botão 'Salvar'
-            if not self.element_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
+            if not self.bot.element_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Salvar) não localizado."])
 
             # Verificar se a conta criada aparece na tabela de contas
-            if self.element_wait_displayed(xpath=f"//span[text()='{conta}']", tentativas=20):
+            if self.bot.element_wait_displayed(xpath=f"//span[text()='{conta}']", tentativas=20):
                 return conta
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
-                mensagem_erro += self.element_get_text(xpath=xpath)
+                mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def adicionar_taxa(self,
@@ -542,83 +543,83 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao adicionar taxa na conta. "
         try:
             # Acessar a aba 'Taxa'
-            if not self.element_click(xpath="//div[span[text()='Taxa']]"):
+            if not self.bot.element_click(xpath="//div[span[text()='Taxa']]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba (Taxa) não localizada."])
 
             # Clica em 'Adicionar'
-            if not self.element_click(xpath="//*[contains(text(),'Adicionar')]"):
+            if not self.bot.element_click(xpath="//*[contains(text(),'Adicionar')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Adicionar) não localizado."])
 
             # Pega a sequência da taxa
-            sequencia = self.element_get_value(xpath="//input[@name='NR_SEQUENCIA']")
+            sequencia = self.bot.element_get_value(xpath="//input[@name='NR_SEQUENCIA']")
             # bot.wait(1000)
 
             # Preenche o campo 'Procedimento'
-            self.element_set_text(xpath="//input[@name='NR_SEQ_PROC_INTERNO']", text=procedimento, delay=1000)
+            self.bot.element_set_text(xpath="//input[@name='NR_SEQ_PROC_INTERNO']", text=procedimento, delay=1000)
             cd_procedimento = ""
             for n in range(10):
-                cd_procedimento = self.element_get_value(xpath="//input[@name='CD_PROCEDIMENTO']", tentativas=1)
+                cd_procedimento = self.bot.element_get_value(xpath="//input[@name='CD_PROCEDIMENTO']", tentativas=1)
                 if cd_procedimento != "":
                     break
-                if self.element_wait_displayed(xpath="//div[contains(text(),'Informação')]", tentativas=2):
+                if self.bot.element_wait_displayed(xpath="//div[contains(text(),'Informação')]", tentativas=2):
                     xpath = "//div[div[div[div[contains(text(),'Informação')]]]]/div[2]/div"
-                    mensagem_erro += self.element_get_text(xpath=xpath)
+                    mensagem_erro += self.bot.element_get_text(xpath=xpath)
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro])
-                self.wait(500)
+                self.bot.wait(500)
             if cd_procedimento == "":
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Procedimento não localizado."])
 
             # Preenche o campo 'Quantidade'
-            self.element_set_text(xpath="//input[@name='QT_PROCEDIMENTO']", text=quantidade)
-            self.tab()
+            self.bot.element_set_text(xpath="//input[@name='QT_PROCEDIMENTO']", text=quantidade)
+            self.bot.tab()
 
             # Preenche o campo 'Data procedimento'
             if data_procedimento:
-                self.element_set_text(xpath="//input[@name='DT_PROCEDIMENTO']", text=data_procedimento)
-                self.tab()
+                self.bot.element_set_text(xpath="//input[@name='DT_PROCEDIMENTO']", text=data_procedimento)
+                self.bot.tab()
 
             # Clica no botão 'Salvar'
-            if not self.element_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
+            if not self.bot.element_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Salvar) não localizado."])
 
             # No popup que aparece preenche o 'Motivo de inclusão'
-            self.element_click(xpath="//div[input[@name='NR_SEQ_MOTIVO_INCL']]", delay=1000)
-            if not self.element_click(xpath=f"//a[span[contains(text(),'{motivo_inclusao}')]]", delay=250):
+            self.bot.element_click(xpath="//div[input[@name='NR_SEQ_MOTIVO_INCL']]", delay=1000)
+            if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{motivo_inclusao}')]]", delay=250):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Motivo de inclusão ({motivo_inclusao}) não localizado."])
 
             # Clica no botão 'Ok'
-            if not self.element_click(xpath="//button[span[contains(text(),'OK')]]"):
+            if not self.bot.element_click(xpath="//button[span[contains(text(),'OK')]]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Verifica se o pop-up de 'Consistência' aparece
             xpath = "//div[@title='Consistência']"
-            if self.find_element(xpath, By.XPATH, ensure_visible=True, waiting_time=3000):
-                inconsistencia = self.verificar_tabela_consistencia()
+            if self.bot.find_element(xpath, By.XPATH, ensure_visible=True, waiting_time=3000):
+                inconsistencia = self.bot.verificar_tabela_consistencia()
                 if inconsistencia:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + inconsistencia])
                 # Clica em 'Ok'
-                if not self.element_click(xpath="//button[span[contains(text(),'OK')]]"):
+                if not self.bot.element_click(xpath="//button[span[contains(text(),'OK')]]"):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Verificar se a taxa criada aparece na tabela de taxas
-            # if self.element_wait_displayed(xpath=f"//div[span[text()='{sequencia}']]"):
+            # if self.bot.element_wait_displayed(xpath=f"//div[span[text()='{sequencia}']]"):
             #     return
-            if self.bd_tasy.confirmar_taxa_adicionada(nr_sequencia=sequencia):
+            if self.bot.bd_tasy.confirmar_taxa_adicionada(nr_sequencia=sequencia):
                 # Às vezes aparece um pop-up de "Informação". Clica em 'Ok'
-                if self.element_wait_displayed(xpath="//div[contains(text(),'Informação')]", tentativas=4):
-                    if not self.element_click(xpath="//button[contains(text(),'Ok')]"):
+                if self.bot.element_wait_displayed(xpath="//div[contains(text(),'Informação')]", tentativas=4):
+                    if not self.bot.element_click(xpath="//button[contains(text(),'Ok')]"):
                         raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
                 return
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
-                mensagem_erro += self.element_get_text(xpath=xpath)
+                mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def retornar_tela_contas(self) -> None:
@@ -628,14 +629,14 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao retornar para a tela de contas. "
         try:
             # Clica para ativar a linha da canta na tabela.
-            self.element_click(xpath="//div[div[text()='Conta']]", tentativas=4)
+            self.bot.element_click(xpath="//div[div[text()='Conta']]", tentativas=4)
 
             # Valido carregamento da tela de detalhes da conta
-            if not self.element_wait_displayed(xpath="//div[contains(text(),'Contas')]"):
+            if not self.bot.element_wait_displayed(xpath="//div[contains(text(),'Contas')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de contas não localizada."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
 
     def anexar_arquivo_conta(self, dir_arquivo: str) -> None:
@@ -645,12 +646,12 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao anexas arquivo na conta. "
         try:
             # Clica para ativar a linha da canta na tabela.
-            self.element_click(xpath="//div[div[text()='Conta']]", tentativas=4)
+            self.bot.element_click(xpath="//div[div[text()='Conta']]", tentativas=4)
 
             # Valido carregamento da tela de detalhes da conta
-            if not self.element_wait_displayed(xpath="//div[contains(text(),'Contas')]"):
+            if not self.bot.element_wait_displayed(xpath="//div[contains(text(),'Contas')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de contas não localizada."])
 
         except Exception:
-            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self)
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)

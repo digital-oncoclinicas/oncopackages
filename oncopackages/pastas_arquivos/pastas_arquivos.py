@@ -1,4 +1,3 @@
-from oncopackages.banco_dados.rpa import salvar_log_erro
 from config import RPA_DIR_PRINT
 from datetime import datetime
 import zipfile
@@ -26,7 +25,6 @@ def limpar_pasta_prints(quantidade_dias: int = 15):
     Exclui os arquivos da pasta de prints do robô.
     :param quantidade_dias: Arquivos com mais de 'quantidade_dias' serão excluídos.
     """
-    mensagem_erro = f"Falha ao excluir arquivos da pasta de prints."
     try:
         # Pegar a data de hoje
         hoje = datetime.today().date()
@@ -44,10 +42,8 @@ def limpar_pasta_prints(quantidade_dias: int = 15):
                     os.remove(caminho_arquivo)
                 else:
                     break
-    except:
-        error_message = salvar_log_erro(mensagem_erro)
-        print(error_message)
-        # raise ValueError(error_message)
+    except Exception as error:
+        print(str(error))
 
 
 def compactar_arquivos(arquivos: list, dir_zip: str):
@@ -56,14 +52,9 @@ def compactar_arquivos(arquivos: list, dir_zip: str):
     :param arquivos: Lista de arquivos a serem compactados;
     :param dir_zip: Diretório onde será salvo o arquivo .zip.
     """
-    try:
-        # Cria o arquivo .zip
-        with zipfile.ZipFile(dir_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            # Adiciona os arquivos da lista no arquivo .zip
-            for arquivo in arquivos:
-                nome_arquivo = os.path.basename(arquivo)
-                zip_file.write(arquivo, nome_arquivo)
-
-    except Exception:
-        error_message = salvar_log_erro("Falha ao compactar os arquivos.")
-        raise ValueError(error_message)
+    # Cria o arquivo .zip
+    with zipfile.ZipFile(dir_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        # Adiciona os arquivos da lista no arquivo .zip
+        for arquivo in arquivos:
+            nome_arquivo = os.path.basename(arquivo)
+            zip_file.write(arquivo, nome_arquivo)

@@ -1,7 +1,6 @@
 from anticaptchaofficial.recaptchav2proxyless import recaptchaV2Proxyless
 from anticaptchaofficial.recaptchav3proxyless import recaptchaV3Proxyless
-from oncopackages.banco_dados.rpa import salvar_log_erro
-import config
+from config import ANTI_CAPTCHA_KEY, LOG_EX_SISTEMA
 
 
 def recaptcha_v2_proxyless(site_url: str, site_key: str) -> str:
@@ -14,25 +13,21 @@ def recaptcha_v2_proxyless(site_url: str, site_key: str) -> str:
     Documentação da API da Anti Captcha: https://anti-captcha.com/pt/apidoc
     """
     mensagem_erro = "Falha ao resolver o captcha. "
-    try:
-        solver = recaptchaV2Proxyless()  # Tipo de CAPTCHAR
-        solver.set_verbose(0)  # 0: Não printa resposta 'Processando', 1: Printa a cada 3 segundos
-        solver.set_key(config.ANTI_CAPTCHA_KEY)  # Setar a variável ANTI_CAPTCHA_KEY no config.py
-        solver.set_website_url(site_url)
-        solver.set_website_key(site_key)
 
-        g_response = solver.solve_and_return_solution()
-        if g_response != 0:
-            # print("g-response: " + g_response)
-            return g_response
-        else:
-            # print("task finished with error " + solver.error_code)
-            # print("task finished with error " + solver.err_string)
-            raise Exception(["Excecao_Sistema", mensagem_erro + solver.error_code + ":" + solver.err_string])
+    solver = recaptchaV2Proxyless()  # Tipo de CAPTCHAR
+    solver.set_verbose(0)  # 0: Não printa resposta 'Processando', 1: Printa a cada 3 segundos
+    solver.set_key(ANTI_CAPTCHA_KEY)  # Setar a variável ANTI_CAPTCHA_KEY no config.py
+    solver.set_website_url(site_url)
+    solver.set_website_key(site_key)
 
-    except Exception:
-        error_message = salvar_log_erro(mensagem_erro)
-        raise ValueError(error_message)
+    g_response = solver.solve_and_return_solution()
+    if g_response != 0:
+        # print("g-response: " + g_response)
+        return g_response
+    else:
+        # print("task finished with error " + solver.error_code)
+        # print("task finished with error " + solver.err_string)
+        raise Exception(["Excecao_Sistema", mensagem_erro + solver.error_code + ":" + solver.err_string])
 
 
 def recaptcha_v3_proxyless(site_url: str, site_key: str) -> str:
@@ -45,25 +40,20 @@ def recaptcha_v3_proxyless(site_url: str, site_key: str) -> str:
     Documentação da API da Anti Captcha: https://anti-captcha.com/pt/apidoc
     """
     mensagem_erro = "Falha ao resolver o captcha. "
-    try:
-        solver = recaptchaV3Proxyless()  # Tipo de CAPTCHAR
-        solver.set_verbose(1)  # 0: Não printa resposta 'Processando', 1: Printa a cada 3 segundos
-        solver.set_key(config.ANTI_CAPTCHA_KEY)  # Setar a variável ANTI_CAPTCHA_KEY no config.py
-        solver.set_website_url(site_url)
-        solver.set_website_key(site_key)
-        solver.set_page_action("home_page")
-        solver.set_min_score(0.9)
 
-        g_response = solver.solve_and_return_solution()
-        if g_response != 0:
-            # print("g-response: " + g_response)
-            return g_response
-        else:
-            # print("task finished with error " + solver.error_code)
-            # print("task finished with error " + solver.err_string)
-            raise Exception([config.LOG_EX_SISTEMA, mensagem_erro + solver.error_code + ":" + solver.err_string])
+    solver = recaptchaV3Proxyless()  # Tipo de CAPTCHAR
+    solver.set_verbose(1)  # 0: Não printa resposta 'Processando', 1: Printa a cada 3 segundos
+    solver.set_key(ANTI_CAPTCHA_KEY)  # Setar a variável ANTI_CAPTCHA_KEY no config.py
+    solver.set_website_url(site_url)
+    solver.set_website_key(site_key)
+    solver.set_page_action("home_page")
+    solver.set_min_score(0.9)
 
-    except Exception:
-        error_message = salvar_log_erro(mensagem_erro)
-        raise ValueError(error_message)
-
+    g_response = solver.solve_and_return_solution()
+    if g_response != 0:
+        # print("g-response: " + g_response)
+        return g_response
+    else:
+        # print("task finished with error " + solver.error_code)
+        # print("task finished with error " + solver.err_string)
+        raise Exception([LOG_EX_SISTEMA, mensagem_erro + solver.error_code + ":" + solver.err_string])
