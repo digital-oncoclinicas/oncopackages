@@ -1,7 +1,9 @@
-from config import RPA_DIR_PRINT
+from config import RPA_DIR_PRINT, RPA_DIR_DOWNLOADS, LOG_EX_SISTEMA
 from datetime import datetime
 import zipfile
 import shutil
+import glob
+import time
 import os
 
 
@@ -58,3 +60,33 @@ def compactar_arquivos(arquivos: list, dir_zip: str):
         for arquivo in arquivos:
             nome_arquivo = os.path.basename(arquivo)
             zip_file.write(arquivo, nome_arquivo)
+
+
+def esperar_conclusao_download(extensao_arquivo: str = '.pdf', timeout: int = 30) -> str:
+    """
+    Espera a conclusão do download do arquivo e retorna o diretório completo dele.
+    :param extensao_arquivo: Formato do arquivo que será baixado. Exemplo: .pdf, .png, .xlsx...
+    :param timeout: tempo máximo de espera pela conclusão do download.
+    :return: Diretório completo do arquivo baixado.
+    """
+    # Conta a quantidade de arquivos na pasta de downloads com a mesma extensão do arquivo que será baixado
+    arquivos = glob.glob(os.path.join(RPA_DIR_DOWNLOADS, f'*.{extensao_arquivo}'))
+    qt_arquivos_antes = len(arquivos)
+
+    # Espera a conclusão do download por até timeout segundos
+    qt_arquivos_apos = 0
+    for i in range(timeout):
+        arquivos = glob.glob(os.path.join(RPA_DIR_DOWNLOADS, f'*.{extensao_arquivo}'))
+        qt_arquivos_apos = len(arquivos)
+        if qt_arquivos_apos > qt_arquivos_antes:
+            break
+        time.sleep(1)
+
+    if qt_arquivos_apos <= qt_arquivos_antes:
+        raise Exception([LOG_EX_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
+
+    # Pega o diretório completo do arquivo baixado
+    files_path = glob.glob(os.path.expanduser(os.path.join(RPA_DIR_DOWNLOADS, f"*{extensao_arquivo}")))
+    dir_arquivo = max(files_path, key=os.path.getctime)
+
+    return dir_arquivo
