@@ -41,16 +41,16 @@ class Tasy:
             self.browser.get(TASY_URL)
 
             # Informa o usuário
-            self.browser.search_element(By.ID, "loginUsername", waiting_time=30).send_keys(TASY_USER)
+            self.browser.search_element("loginUsername", By.ID, waiting_time=30).send_keys(TASY_USER)
 
             # Informa o senha
-            self.browser.search_element(By.ID, "loginPassword").send_keys(TASY_PWD)
+            self.browser.search_element("loginPassword", By.ID).send_keys(TASY_PWD)
 
             # Entrar
-            self.browser.search_element(By.ID, "loginPassword").send_keys(Keys.ENTER)
+            self.browser.search_element("loginPassword", By.ID).send_keys(Keys.ENTER)
 
             # Verificar se o login foi realizado com sucesso
-            if self.browser.search_element(By.XPATH, "//a[text() = 'Funções']", waiting_time=60):
+            if self.browser.search_element("//a[text() = 'Funções']", By.XPATH, waiting_time=60):
                 return
 
             # Verificar se a senha está errada
