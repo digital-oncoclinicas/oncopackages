@@ -56,7 +56,8 @@ class Tasy:
         mensagem_erro = 'Falha ao trocar o estabelecimento. '
         try:
             # Verificar se já está no estabelecimento correto
-            xpath = "//*[@class='w-footer__establishment']"  # Nome do estab que fica no canto inferior central de qualquer tela
+            # Nome do estabelecimento que fica no canto inferior central de qualquer tela
+            xpath = "//*[@class='w-footer__establishment']"
             estab_atual = self.bot.find_element(xpath, By.XPATH, ensure_visible=True).get_attribute('innerText')
             estab_atual = estab_atual.replace(" ", "")
             estab_necessario = estabelecimento.replace(" ", "")
