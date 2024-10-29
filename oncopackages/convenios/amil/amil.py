@@ -1,4 +1,4 @@
-from oncopackages.ferramentas.browser import Browser
+from oncopackages.ferramentas.web_bot import Webbot
 from config import LOG_EX_SISTEMA, LOG_EX_NEGOCIO
 from banco_dados_tasy import BancoDadosTasy
 from banco_dados_rpa import BancoDadosRpa
@@ -7,7 +7,7 @@ from botcity.web.bot import By
 
 class Amil:
     def __init__(self, bd_rpa: BancoDadosRpa, bd_tasy: BancoDadosTasy = None):
-        self.bot = Browser()
+        self.bot = Webbot()
         self.bd_rpa = bd_rpa
         self.bd_tasy = bd_tasy
 
