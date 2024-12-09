@@ -150,8 +150,7 @@ class CadastroCompletoPessoas(Tasy):
             self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).click()
     
             # Verifica se salvou com sucesso
-            xpath = f"(//div[contains(@data-row-idx, '0')])[2]"
-            if self.bot.find_element(xpath, By.XPATH, ensure_visible=True):
+            if self.bot.element_wait_displayed(xpath=f"//*[contains(text(), '{classificacao}')]"):
                 return
     
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
