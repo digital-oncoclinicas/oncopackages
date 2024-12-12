@@ -297,6 +297,12 @@ class Tasy:
                         mensagem_erro += "Não foi possível encerrar a função (Cadastro Completo de Pessoa)."
                         raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
+                    # Verificar se aparece o popup de 'Operação abortada'
+                    if self.bot.element_wait_displayed(xpath="//*[text()='Operação abortada']", tentativas=4):
+                        xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
+                        mensagem_erro += self.bot.element_get_text(xpath=xpath)
+                        raise Exception([LOG_EX_SISTEMA, mensagem_erro])
+
             # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
             for i in range(10):
                 self.bot.key_esc(wait=1000)
