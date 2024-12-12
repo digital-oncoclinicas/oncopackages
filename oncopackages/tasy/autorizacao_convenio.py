@@ -570,7 +570,7 @@ class AutorizacaoConvenio(Tasy):
                 self.bot.element_click("//button[span[text()='Ok']]")
                 # Espera o Tasy trazer a descrição do medicamento
                 ds_procedimento = ''
-                for n in range(20):
+                for n in range(40):
                     ds_procedimento = self.bot.element_get_value("//input[@name='DS_PROCEDIMENTO']")
                     if ds_procedimento != '':
                         break

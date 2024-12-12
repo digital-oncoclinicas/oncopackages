@@ -99,7 +99,7 @@ class Tasy:
         try:
             # Verificar se a função já está em execução
             xpath = f"//div/span[contains(text(), '{tasy_funcao}')]"
-            if self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, waiting_time=4000):
+            if self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, waiting_time=1000):
                 return
 
             # Clica no seta da direita da tela de funções
