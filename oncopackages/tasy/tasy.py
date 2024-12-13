@@ -264,7 +264,7 @@ class Tasy:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Ícone de pesquisa (Lupa) não localizado."])
 
                 # Ativa a aba 'Pessoa'
-                if not self.bot.element_click("//div[span[text()='Pessoa']]", delay=1000):
+                if not self.bot.element_click("//div[span[text()='Pessoa']]", delay=2000):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba (Pessoa) não localizada."])
 
                 # Insere o número do prontuário no campo de pesquisa
