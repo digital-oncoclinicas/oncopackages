@@ -268,7 +268,7 @@ class Tasy:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Aba (Pessoa) não localizada."])
 
                 # Insere o número do prontuário no campo de pesquisa
-                if not self.bot.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario, delay=1000):
+                if not self.bot.element_set_text("//input[contains(@name, 'CD_PESSOA_FISICA_')]", prontuario, delay=2000):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Campo (Código) não localizado."])
 
                 # Clica no botão Filtrar

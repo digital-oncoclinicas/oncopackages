@@ -53,8 +53,11 @@ class Webbot(WebBot):
                 for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
-                        elemento.click()
-                        return True
+                        try:
+                            elemento.click()
+                            return True
+                        except:
+                            pass
             except:
                 pass
             self.wait(1000)
@@ -75,9 +78,12 @@ class Webbot(WebBot):
                 for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
-                        action = ActionChains(self.driver)
-                        action.click(elemento).perform()
-                        return True
+                        try:
+                            action = ActionChains(self.driver)
+                            action.click(elemento).perform()
+                            return True
+                        except:
+                            pass
             except:
                 pass
             self.wait(1000)
@@ -98,9 +104,12 @@ class Webbot(WebBot):
                 for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
-                        action = ActionChains(self.driver)
-                        action.context_click(elemento).perform()
-                        return True
+                        try:
+                            action = ActionChains(self.driver)
+                            action.context_click(elemento).perform()
+                            return True
+                        except:
+                            pass
             except:
                 pass
             self.wait(1000)
@@ -121,9 +130,12 @@ class Webbot(WebBot):
                 for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
-                        action = ActionChains(self.driver)
-                        action.double_click(elemento).perform()
-                        return True
+                        try:
+                            action = ActionChains(self.driver)
+                            action.double_click(elemento).perform()
+                            return True
+                        except:
+                            pass
             except:
                 pass
             self.wait(1000)
@@ -173,9 +185,12 @@ class Webbot(WebBot):
                 for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
-                        elemento.clear()
-                        elemento.send_keys(text)
-                        return True
+                        try:
+                            elemento.clear()
+                            elemento.send_keys(text)
+                            return True
+                        except:
+                            pass
             except:
                 pass
             self.wait(1000)
