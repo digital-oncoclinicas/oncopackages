@@ -189,7 +189,7 @@ class AutorizacaoConvenio(Tasy):
                 xpath = f"//div[div[div[span[text() = '{autorizacao}']]] and div[div[span[span[contains(text(), '{nome_estagio}')]]]]]"
             else:
                 xpath = f"//span/span[contains(text(), '{nome_estagio}')]"
-            if not self.bot.find_element(xpath, By.XPATH):
+            if not self.bot.find_element(xpath, By.XPATH, 30000):
                 raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Timeout ao confirmar a alteração."])
     
         except Exception:
