@@ -16,10 +16,11 @@ class AutorizacaoConvenio(BancoDadosTasy):
             # Query SQL
             query = f"""
             SELECT NVL(
-                        (SELECT CD_USUARIO_CONVENIO
-                            FROM TASY.PACIENTE_SETOR_CONVENIO
-                            WHERE NR_SEQ_PACIENTE = AC.NR_SEQ_PACIENTE_SETOR
-                            ORDER BY DT_ATUALIZACAO DESC
+                        (SELECT PSC.CD_USUARIO_CONVENIO
+                            FROM TASY.PACIENTE_SETOR PS
+                            JOIN TASY.PACIENTE_SETOR_CONVENIO PSC ON PSC.NR_SEQ_PACIENTE = PS.NR_SEQ_PACIENTE
+                            WHERE PS.IE_STATUS = 'A' AND PS.CD_PESSOA_FISICA = AC.CD_PESSOA_FISICA
+                            ORDER BY PSC.DT_ATUALIZACAO DESC
                             FETCH FIRST 1 ROW ONLY),
                         (SELECT ACC.CD_USUARIO_CONVENIO
                             FROM TASY.ATENDIMENTO_PACIENTE AP
@@ -39,7 +40,7 @@ class AutorizacaoConvenio(BancoDadosTasy):
     
             # Pega o resultado da consulta
             row = self.cursor.fetchone()
-            if not row:
+            if not row[0]:
                 raise Exception(["Excecao_Negocio", mensagem_erro + "Carteirinha não localizada."])
     
             return row[0]
