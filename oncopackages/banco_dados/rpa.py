@@ -9,6 +9,13 @@ import sys
 class BancoDadosRpa:
     def __init__(self):
         # Conecta com o banco de dados
+        self.conn = None
+
+        # Cria o cursor
+        self.cursor = None
+
+    def iniciar_conexao(self):
+        # Conecta com o banco de dados
         self.conn = pyodbc.connect(
             'Driver={SQL Server};'
             f'Server={RPA_DB_SERVER};'
