@@ -46,7 +46,7 @@ class BancoDadosRpa:
             runner = socket.gethostname()
             parametros = (RPA_SHORT_NAME, task_name, error_line, error_message, runner)
 
-            if not self.conn or not self.conn.is_healthy():
+            if not self.conn:
                 self.iniciar_conexao()
 
             # Executando a procedure
