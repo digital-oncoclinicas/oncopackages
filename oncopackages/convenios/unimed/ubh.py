@@ -3,6 +3,7 @@ from config import LOG_EX_SISTEMA, LOG_EX_NEGOCIO
 from banco_dados_tasy import BancoDadosTasy
 from banco_dados_rpa import BancoDadosRpa
 from botcity.web.bot import By
+import re
 
 
 class Ubh:
@@ -45,6 +46,51 @@ class Ubh:
             # Reportar falha genérica
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
+        except Exception:
+            error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
+            raise ValueError(error_message)
+
+    def consultar_cobertura_beneficiario(self, carteirinha: str) -> dict:
+        """
+        Consulta a situação e cobertura da elegibilidade de beneficiários Unimed BH.
+        :param carteirinha: Carteirinha do paciente.
+        :return dicionário com as chaves Produto, Situação, Rede e Tipo de acomodação.
+        """
+        mensagem_erro = "Falha ao consultar a cobertura do beneficiário. "
+        try:
+            # Acessar a tela de pesquisa
+            self.bot.navigate_to("https://www12.unimedbh.com.br/unioffice/conteudoConsultasSituacaoCobertura.do")
+
+            # Remove qualquer caractere não numérico
+            carteirinha = re.sub(r'[^0-9]', '', carteirinha)
+
+            # Preencha com zeros à esquerda até completar 17 caracteres
+            carteirinha = carteirinha.zfill(17)
+
+            # Preenche o campo Código do beneficiário
+            self.bot.find_element("codigo_cliente", By.NAME).send_keys(carteirinha)
+            self.bot.enter()
+
+            # Deixa a carteirinha com a formatação do site "0.006.0502.982.284.00-0"
+            cart_formatada = re.sub(r'(\d)(\d{3})(\d{4})(\d{3})(\d{3})(\d{2})(\d)$', r'\1.\2.\3.\4.\5.\6-\7', carteirinha)
+
+            # Verificar se o site localizou o beneficiário
+            if not self.bot.find_element(f"//td[contains(text(),'{cart_formatada}')]", By.XPATH):
+                raise Exception([LOG_EX_NEGOCIO, mensagem_erro + f"Beneficiário ({carteirinha}) não localizado."])
+
+            produto = self.bot.find_element("//tr[td[contains(text(),'Produto')]]/td[2]", By.XPATH).text
+            situacao = self.bot.find_element("//tr[td[contains(text(),'Situação')]]/td[2]", By.XPATH).text
+            rede = self.bot.find_element("//tr[td[contains(text(),'Rede')]]/td[2]", By.XPATH).text
+            tipo_acomodacao = ""
+            xpath = "//tr[td[*[contains(text(),'Tipo de Acomodação')]]]/td[2]"
+            if self.bot.find_element(xpath, By.XPATH, waiting_time=100):
+                tipo_acomodacao = self.bot.find_element(xpath, By.XPATH).text
+
+            return {"Produto": produto,
+                    "Situação": situacao,
+                    "Rede": rede,
+                    "Tipo de acomodação": tipo_acomodacao}
+
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
             raise ValueError(error_message)
