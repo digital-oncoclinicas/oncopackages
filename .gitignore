@@ -37,6 +37,8 @@ Thumbs.db
 # Python files
 config.py
 teste.py
+banco_dados_rpa.py
+banco_dados_tasy.py
 requirements.txt
 
 # Applications
