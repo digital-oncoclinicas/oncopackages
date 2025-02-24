@@ -1,4 +1,4 @@
-from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, LOG_EX_SISTEMA, LOG_MESSAGES,
+from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, LOG_EX_SISTEMA,
                     LOG_EX_NEGOCIO, RPA_DIR_PRINT)
 from botcity.web import WebBot
 import traceback
@@ -27,7 +27,7 @@ class BancoDadosRpa:
         # Cria o cursor
         self.cursor = self.conn.cursor()
 
-    def __gerar_sequencia_erro(self, function_name: str, error_line: int, error_message: str) -> int:
+    def __gerar_sequencia_erro(self, function_name: str, error_line: int, error_message: str):
         """
         Executa a procedure 'INSERIR_LOG_ERRO' do banco de dados do robô.
         :param function_name: Nome da função que está sendo executada;
