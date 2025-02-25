@@ -99,7 +99,7 @@ class Tasy:
         try:
             # Verificar se a função já está em execução
             xpath = f"//div/span[contains(text(), '{tasy_funcao}')]"
-            if self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, waiting_time=1000):
+            if self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, waiting_time=2000):
                 return
 
             # Clica no seta da direita da tela de funções
@@ -114,7 +114,7 @@ class Tasy:
 
             # Clicar na função
             xpath = f"//a/span[contains(text(), '{tasy_funcao}')]"
-            if not self.bot.element_click(xpath=xpath):
+            if not self.bot.element_click(xpath=xpath, tentativas=30):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + f"Função ({tasy_funcao}) não localizada."])
 
         except Exception:
