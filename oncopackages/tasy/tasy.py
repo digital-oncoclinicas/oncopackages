@@ -237,7 +237,7 @@ class Tasy:
         try:
             # Espera o desenho da lupa que fica no canto superior esquerdo aparecer
             xpath = "//div[@class='person-icon-finder']"
-            if not self.bot.find_element(xpath, By.XPATH):
+            if not self.bot.find_element(xpath, By.XPATH, waiting_time=60000):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Localizar paciente) não localizado."])
 
             # Se não for a primeira pesquisa, realizar o filtro a partir do campo 'Código' da barra superior.
