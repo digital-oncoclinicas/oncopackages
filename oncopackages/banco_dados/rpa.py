@@ -84,8 +84,10 @@ class BancoDadosRpa:
 
         # Extrair o nome da função, Linha e Mensagem de erro usando a biblioteca 'sys'
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        function_name = exc_traceback.tb_frame.f_code.co_name
-        error_line = exc_traceback.tb_lineno
+        last_tb = traceback.extract_tb(exc_traceback)[-1]
+        # function_path = last_tb.filename
+        function_name = last_tb.name
+        error_line = last_tb.lineno
         error_message = str(exc_value)
 
         # Verificar se foi um erro mapeado

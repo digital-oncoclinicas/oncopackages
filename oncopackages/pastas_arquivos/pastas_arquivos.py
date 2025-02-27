@@ -1,4 +1,4 @@
-from config import RPA_DIR_PRINT
+from config import RPA_DIR_PRINT, LOG_EX_NEGOCIO
 from datetime import datetime
 import zipfile
 import shutil
@@ -46,15 +46,33 @@ def limpar_pasta_prints(quantidade_dias: int = 15):
         print(str(error))
 
 
-def compactar_arquivos(arquivos: list, dir_zip: str):
+def compactar_arquivos(lista_arquivos: list, dir_zip: str):
     """
     Realiza a compactação dos arquivos listados.
-    :param arquivos: Lista de arquivos a serem compactados;
+    :param lista_arquivos: Lista de arquivos a serem compactados;
     :param dir_zip: Diretório onde será salvo o arquivo .zip.
     """
     # Cria o arquivo .zip
     with zipfile.ZipFile(dir_zip, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         # Adiciona os arquivos da lista no arquivo .zip
-        for arquivo in arquivos:
+        for arquivo in lista_arquivos:
             nome_arquivo = os.path.basename(arquivo)
             zip_file.write(arquivo, nome_arquivo)
+
+
+def descompactar_arquivo(zip_path: str):
+    """
+    Descompacta um arquivo .zip no mesmo diretório onde ele está localizado.
+    :param zip_path: Caminho do arquivo .zip
+    :return Diretório dos arquivos baixados
+    """
+    if not zipfile.is_zipfile(zip_path):
+        raise Exception([LOG_EX_NEGOCIO, "Falha ao descompactar o aquivo. Extensão inválida."])
+
+    extract_dir = os.path.splitext(zip_path)[0]  # Cria um diretório com o nome do arquivo (sem extensão)
+    os.makedirs(extract_dir, exist_ok=True)  # Garante que o diretório existe
+
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
+
+    return extract_dir
