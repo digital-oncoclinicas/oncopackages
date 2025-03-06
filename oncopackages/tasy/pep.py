@@ -37,7 +37,7 @@ class ProntuarioEletronicoPaciente(Tasy):
 
             # Clica no menu 'Ciclos'
             xpath = f"//span[contains(text(),'Ciclos')]"
-            self.bot.element_click(xpath=xpath, delay=1000)
+            self.bot.search_element(xpath=xpath, delay=1000).click()
 
         except Exception:
             error_message = self.bd_rpa.salvar_log_erro(mensagem_erro, self.bot)
