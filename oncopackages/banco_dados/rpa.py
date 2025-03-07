@@ -100,13 +100,14 @@ class BancoDadosRpa:
             if len(error_message) == 3:
                 return error_message
 
-            error_seq = self.__gerar_sequencia_erro(function_name, error_line, error_message[1])
+            log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}") + error_message[1]
+            error_seq = self.__gerar_sequencia_erro(function_name, error_line, log_message)
             error_message.append(error_seq)
 
         else:  # Erro não mapeado
             error_seq = self.__gerar_sequencia_erro(function_name, error_line, error_message)
-            function_error_message = LOG_MESSAGES.get(function_name, f"Falha na inesperada na função: {function_name}")
-            error_message = [LOG_EX_SISTEMA, function_error_message, error_seq]
+            log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}")
+            error_message = [LOG_EX_SISTEMA, log_message, error_seq]
 
         # Print de tela caso o objeto bot != None
         if bot and bot.capabilities:
