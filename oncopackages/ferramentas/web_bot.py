@@ -1,4 +1,5 @@
 from config import RPA_DIR_DOWNLOADS, HEADLESS, LOG_EX_SISTEMA
+from webdriver_manager.chrome import ChromeDriverManager
 from botcity.web.bot import ActionChains, WebBot, By
 import shutil
 import sys
@@ -15,8 +16,8 @@ class Webbot(WebBot):
         # Define a pasta usada para salvar os downloads
         self.download_folder_path = RPA_DIR_DOWNLOADS
 
-        # Define o diretório do chromedriver.exe. Baixado do onco_packages
-        self.driver_path = chrome_driver_path()
+        # Baixa o chromedriver.exe
+        self.driver_path = ChromeDriverManager().install()
 
     def search_element(self, xpath: str, tentativas: int = 15, delay: int = 0):
         """

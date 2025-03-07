@@ -1,5 +1,5 @@
 from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, LOG_EX_SISTEMA,
-                    LOG_EX_NEGOCIO, RPA_DIR_PRINT)
+                    LOG_EX_NEGOCIO, RPA_DIR_PRINT, LOG_MESSAGES)
 from botcity.web import WebBot
 import traceback
 import pyodbc
@@ -45,6 +45,7 @@ class BancoDadosRpa:
                     @errorlineNumber = ?, 
                     @errorMessage = ?, 
                     @runner = ?, 
+                    @traceback = ?, 
                     @nrSequencia = @Out OUTPUT;
                 SELECT @Out;
             """
@@ -52,7 +53,8 @@ class BancoDadosRpa:
             # Criando lista de parâmetros de entrada da procedure
             error_message = str(error_message).replace("'", "")
             runner = socket.gethostname()
-            parametros = (RPA_SHORT_NAME, function_name, error_line, error_message, runner)
+            traceback_info = traceback.format_exc().replace("'", "")
+            parametros = (RPA_SHORT_NAME, function_name, error_line, error_message, runner , traceback_info)
 
             if not self.conn:
                 self.iniciar_conexao()
@@ -74,10 +76,9 @@ class BancoDadosRpa:
             error_message = sys.exc_info()[1]
             print(f'Falha ao salvar o log de erro no banco de dados - {error_line}:{error_message}')
 
-    def salvar_log_erro(self, function_error_message: str, bot: WebBot = None) -> list:
+    def salvar_log_erro(self, bot: WebBot = None) -> list:
         """
         Salva log de erro no banco de dados e o print de tela na pasta do robô.
-        :param function_error_message: Mensagem de erro padrão da função;
         :param bot: Objeto do navegador usado para tirar o print de tela.
         :return: Lista com [tipo de exceção, mensagem do erro, código do erro]
         """
@@ -104,6 +105,7 @@ class BancoDadosRpa:
 
         else:  # Erro não mapeado
             error_seq = self.__gerar_sequencia_erro(function_name, error_line, error_message)
+            function_error_message = LOG_MESSAGES.get(function_name, f"Falha na inesperada na função: {function_name}")
             error_message = [LOG_EX_SISTEMA, function_error_message, error_seq]
 
         # Print de tela caso o objeto bot != None
