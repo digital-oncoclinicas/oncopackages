@@ -90,6 +90,7 @@ class BancoDadosRpa:
         function_name = last_tb.name
         error_line = last_tb.lineno
         error_message = str(exc_value)
+        log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}")
 
         # Verificar se foi um erro mapeado
         if LOG_EX_SISTEMA in error_message or LOG_EX_NEGOCIO in error_message:  # Erro mapeado
@@ -100,13 +101,13 @@ class BancoDadosRpa:
             if len(error_message) == 3:
                 return error_message
 
-            log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}") + error_message[1]
+            log_message += error_message[1]
+            error_message[1] = log_message
             error_seq = self.__gerar_sequencia_erro(function_name, error_line, log_message)
             error_message.append(error_seq)
 
         else:  # Erro não mapeado
             error_seq = self.__gerar_sequencia_erro(function_name, error_line, error_message)
-            log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}")
             error_message = [LOG_EX_SISTEMA, log_message, error_seq]
 
         # Print de tela caso o objeto bot != None
