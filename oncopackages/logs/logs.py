@@ -1,74 +1,57 @@
-from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, LOG_EX_SISTEMA,
-                    LOG_EX_NEGOCIO, RPA_DIR_PRINT, LOG_MESSAGES)
+from config import RPA_SHORT_NAME, LOG_EX_SISTEMA, LOG_EX_NEGOCIO, RPA_DIR_PRINT, LOG_MESSAGES
 from botcity.web import WebBot
+from datetime import datetime
+import logging_loki
 import traceback
-import pyodbc
+import logging
 import socket
 import sys
 
 
-class BancoDadosRpa:
+class Logger:
     def __init__(self):
-        # Conecta com o banco de dados
-        self.conn = pyodbc.connect(
-            'Driver={SQL Server};'
-            f'Server={RPA_DB_SERVER};'
-            f'Database={RPA_DB_NAME};'
-            f'UID={RPA_DB_USER};'
-            f'PWD={RPA_DB_PWD};')
+        handler = logging_loki.LokiHandler(
+            url="http://192.168.31.128:3100/loki/api/v1/push",
+            tags={"application": "error_app"},
+            # auth=("username", "password"),
+            version="1",
+        )
 
-        # Cria o cursor
-        self.cursor = self.conn.cursor()
+        self.logger = logging.getLogger("error_logger")
+        self.logger.addHandler(handler)
 
     def __gerar_sequencia_erro(self, function_name: str, error_line: int, error_message: str):
         """
-        Executa a procedure 'INSERIR_LOG_ERRO' do banco de dados do robô.
-        :param function_name: Nome da função que está sendo executada;
-        :param error_line: Linha em que o erro ocorreu;
+        Enviar o log de erro para o Grafana Loki.
+        :param function_name: Nome da função onde ocorreu o erro;
+        :param error_line: Linha onde ocorreu o erro;
         :param error_message: Mensagem do erro.
         :return: Código do erro.
         """
         try:
-            # Montando a query sql para execução da procedure
-            query = """
-                DECLARE @Out int;
-                EXEC [RPA].[INSERIR_LOG_ERRO] 
-                    @rpa = ?, 
-                    @taskName = ?, 
-                    @errorlineNumber = ?, 
-                    @errorMessage = ?, 
-                    @runner = ?, 
-                    @traceback = ?, 
-                    @nrSequencia = @Out OUTPUT;
-                SELECT @Out;
-            """
+            nr_seq_erro = datetime.now().strftime("%Y%m%d%H%M%S%f")
 
-            # Criando lista de parâmetros de entrada da procedure
-            error_message = str(error_message).replace("'", "")
-            runner = socket.gethostname()
-            traceback_info = traceback.format_exc().replace("'", "")
-            parametros = (RPA_SHORT_NAME, function_name, error_line, error_message, runner , traceback_info)
-
-            # Executando a procedure
-            self.cursor.execute(query, parametros)
-
-            # Pegando o valor de retorno
-            row = self.cursor.fetchone()
-            nr_seq_erro = row[0]
-
-            # Salva as alterações
-            self.conn.commit()
-
+            self.logger.error(
+                msg=traceback.format_exc(),
+                extra={"tags": {"SeqErro": nr_seq_erro,
+                                "Robo": RPA_SHORT_NAME,
+                                "NomeFuncao": function_name,
+                                "LinhaErro": error_line,
+                                "MensagemErro": error_message,
+                                "Runner": socket.gethostname()
+                                }
+                       }
+            )
             return nr_seq_erro
 
         except:
             error_line = sys.exc_info()[2].tb_lineno
             error_message = sys.exc_info()[1]
-            print(f'Falha ao salvar o log de erro no banco de dados - {error_line}:{error_message}')
+            print(f'Falha ao enviar o log para o Grafana Loki - {error_line}:{error_message}')
 
     def salvar_log_erro(self, bot: WebBot = None) -> list:
         """
-        Salva log de erro no banco de dados e o print de tela na pasta do robô.
+        Salva log de erro e o print de tela na pasta do robô.
         :param bot: Objeto do navegador usado para tirar o print de tela.
         :return: Lista com [tipo de exceção, mensagem do erro, código do erro]
         """
@@ -108,9 +91,3 @@ class BancoDadosRpa:
                 pass
 
         return error_message
-
-    def encerrar_conexao(self):
-        if self.cursor:
-            self.cursor.close()
-        if self.conn:
-            self.conn.close()

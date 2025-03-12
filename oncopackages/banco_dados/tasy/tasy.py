@@ -5,13 +5,6 @@ import oracledb
 class BancoDadosTasy:
     def __init__(self):
         # Conecta com o banco de dados do Tasy
-        self.conn = None
-
-        # Criando o cursor
-        self.cursor = None
-
-    def iniciar_conexao(self):
-        # Conecta com o banco de dados do Tasy
         self.conn = oracledb.connect(
             user=TASY_DB_USER,
             password=TASY_DB_PWD,
