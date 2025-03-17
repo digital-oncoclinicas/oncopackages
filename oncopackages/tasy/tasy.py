@@ -319,7 +319,7 @@ class Tasy:
 
         # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
         for i in range(10):
-            self.bot.key_esc(wait=500)
+            self.bot.key_esc(wait=1000)
 
         # Espera o campo 'Atendimento' ser atualizado para o atendimento pesquisado
         if self.bot.element_wait_displayed(xpath=f"//span[@id='NR_ATENDIMENTO']/span[text()='{atendimento}']"):

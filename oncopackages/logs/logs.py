@@ -63,7 +63,7 @@ class Logger:
         function_name = last_tb.name
         error_line = last_tb.lineno
         error_message = str(exc_value)
-        log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}")
+        log_message = LOG_MESSAGES.get(function_name, f"Falha inesperada na função: {function_name}. ")
 
         # Verificar se foi um erro mapeado
         if LOG_EX_SISTEMA in error_message or LOG_EX_NEGOCIO in error_message:  # Erro mapeado
