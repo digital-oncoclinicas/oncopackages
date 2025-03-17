@@ -267,64 +267,65 @@ class Tasy:
         if not self.bot.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
             raise Exception([LOG_EX_SISTEMA, "Tela de resultado da pesquisa não localizada."])
 
-    def pesquisar_atendimento(self, nr_atendimento: str):
+    def pesquisar_atendimento(self, atendimento: str) -> None:
         """
-        Pesquisa pelo número do atendimento.
-        :param nr_atendimento: Número do atendimento.
+        Função que realiza a pesquisa pelo número do atendimento no Tasy.
         """
-        # Espera a tela carregar
-        xpath = "//span[text()='Agenda de consulta']"
-        if not self.bot.find_element(xpath, By.XPATH, waiting_time=30000, ensure_clickable=True):
-            raise Exception([LOG_EX_SISTEMA, "Botão Pesquisar não localizado."])
+        # Espera o desenho da lupa que fica no canto superior esquerdo aparecer
+        xpath = "//div[@class='person-icon-finder']"
+        if not self.bot.find_element(xpath, By.XPATH, waiting_time=60000):
+            raise Exception([LOG_EX_SISTEMA, "Botão (Localizar paciente) não localizado."])
 
-        # Se não for a primeira pesquisa, realizar o filtro a partir do campo atendimento da barra superior.
+        # Verifica se é possível pesquisar a partir da barra superior. Isso só é possível a partir da segunda pesquisa.
         consulta_realizada = False
         xpath = "//a[@class='btn inline-edit-link ng-scope']"
-        if self.bot.find_element(xpath, By.XPATH, waiting_time=2000):
-            # Clica no desenho do lapis para editar o campo do atendimento
+        if self.bot.find_element(xpath, By.XPATH, waiting_time=0):
+            # Clica no desenho de um lapis no campo 'Atendimento'
+            element = self.bot.find_element(xpath, By.XPATH, waiting_time=0)
             action = ActionChains(self.bot.driver)
-            elemento = self.bot.find_element(xpath, By.XPATH)
-            action.click(elemento).perform()
-            # Insere o atendimento:
-            try:
-                xpath = "//div[span[text()='Atendimento']]/div/span/input"
-                self.bot.find_element(xpath, By.XPATH, ensure_visible=True).send_keys(nr_atendimento)
+            action.click(element).perform()
+
+            # Preenche o campo 'Atendimento'
+            xpath = "//input[@ng-if='inlineEditActive']"
+            if self.bot.find_element(xpath, By.XPATH, waiting_time=2000):
+                self.bot.find_element(xpath, By.XPATH).send_keys(atendimento)
                 self.bot.enter()
                 consulta_realizada = True
-            except:
-                consulta_realizada = False
 
-        # Se for a primeira pesquisa ou não for possível realizar a pesquisa pelo jeito anterior,
-        # realizar o filtro a partir do botão com o símbolo da lupa.
-        xpath = "//a[@class='btn inline-edit-link ng-scope']"
-        if not self.bot.find_element(xpath, By.XPATH, waiting_time=0) or consulta_realizada is False:
+        # Caso seja a primeira consulta ou não foi possível realizar a pesquisa da forma anterior:
+        if not consulta_realizada:
             # Clicar no ícone de Pesquisar que fica no canto superior esquerdo
-            xpath = "//div[div[@class='person-icon-finder']]"
-            self.bot.find_element(xpath, By.XPATH).click()
+            self.bot.element_click("//div[div[@class='person-icon-finder']]")
+
+            # Ativa a aba 'Atendimento'
+            if not self.bot.element_click("//div[span[text()='Atendimento']]"):
+                raise Exception([LOG_EX_SISTEMA, "Aba 'Atendimento' não localizada."])
 
             # Insere o número do atendimento no campo de pesquisa
-            xpath = "//input[@name='NR_ATENDIMENTO']"
-            self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).clear()
-            self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).send_keys(nr_atendimento)
+            if not self.bot.element_set_text("//input[contains(@name, 'NR_ATENDIMENTO')]", atendimento, delay=1000):
+                raise Exception([LOG_EX_SISTEMA, "Campo (Número do atendimento) não localizado."])
 
             # Clica no botão Filtrar
-            self.bot.find_element("//button[contains(text(),'Filtrar')]", By.XPATH, ensure_clickable=True).click()
+            if not self.bot.element_click(xpath="//button[contains(text(),'Filtrar')]", delay=500):
+                raise Exception([LOG_EX_SISTEMA, "Botão (Filtrar) não localizado."])
 
-            # Duplo click na primeira linha da tabela de resultados
-            if not self.bot.element_double_click(xpath=f"//div[div/div/span[text()='{nr_atendimento}']]"):
-                raise Exception([LOG_EX_NEGOCIO, f"Atendimento ({nr_atendimento}) não localizado."])
+            # Espera o atendimento aparecer na tabela de resultados
+            if not self.bot.element_wait_displayed(f"//div[div/div/span[text()='{atendimento}']]"):
+                raise Exception(["Excecao_Negocio", "Atendimento não localizado."])
 
-        # Esperar a tela do PEPA carregar
-        if not self.bot.element_wait_displayed(xpath="//span[text()='Agenda de consulta']"):
-            raise Exception([LOG_EX_SISTEMA, "Tela do prontuário do paciente não localizada."])
+            # Clica no botão 'Ok'
+            if not self.bot.element_click("//button[span[text() = 'Ok']]"):
+                raise Exception([LOG_EX_SISTEMA, "Botão (Ok) não localizado."])
 
         # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
         for i in range(10):
-            self.bot.key_esc(wait=1000)
+            self.bot.key_esc(wait=500)
 
-        # Verifica se a tela carregou
-        if not self.bot.find_element("//div[text() = 'Paciente']", By.XPATH, ensure_visible=True, waiting_time=2000):
-            raise Exception([LOG_EX_NEGOCIO, "Popup de erro localizado após pesquisa."])
+        # Espera o campo 'Atendimento' ser atualizado para o atendimento pesquisado
+        if self.bot.element_wait_displayed(xpath=f"//span[@id='NR_ATENDIMENTO']/span[text()='{atendimento}']"):
+            return
+
+        raise Exception([LOG_EX_SISTEMA, "Dados do atendimento não localizados."])
 
     def esperar_conclusao_download(self, extensao_arquivo: str = '.pdf', timeout: int = 30000) -> str:
         """
@@ -345,7 +346,7 @@ class Tasy:
             self.bot.wait(500)
 
         if qt_arquivos_apos <= qt_arquivos_antes:
-            raise Exception([LOG_EX_SISTEMA, f'Timeout ao esperar a conclusão do download.'])
+            raise Exception([LOG_EX_SISTEMA, f'Tempo de espera excedido.'])
 
         # Pega o diretório completo do arquivo baixado
         dir_arquivo = self.bot.get_last_created_file(path=RPA_DIR_DOWNLOADS)
