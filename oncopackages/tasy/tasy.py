@@ -72,27 +72,22 @@ class Tasy:
         # Clicar em 'Ok'
         self.bot.find_element("//button[contains(text(), 'Ok')]", By.XPATH).click()
 
-    def executar_funcao(self, tasy_funcao: str, clicar_seta_direita: bool = False, clicar_seta_esquerda: bool = False):
+    def executar_funcao(self, tasy_funcao: str, pesquisar_funcao: bool = False):
         """
         Verifica se o Tasy já está com a função desejada em execução e à executa caso necessário.
         :param tasy_funcao: Função que deseja executar;
-        :param clicar_seta_direita: Se True, clica no seta da direita a tela de funções do Tasy;
-        :param clicar_seta_esquerda: Se True, clica no seta da esquerda a tela de funções do Tasy.
+        :param pesquisar_funcao: Se True, digita o nome da função no campo de busca.
         """
         # Verificar se a função já está em execução
         xpath = f"//div/span[contains(text(), '{tasy_funcao}')]"
         if self.bot.find_element(xpath, By.XPATH, ensure_clickable=True, waiting_time=2000):
             return
 
-        # Clica no seta da direita da tela de funções
-        if clicar_seta_direita:
-            xpath = "//button[@class='w-apps__next']"
-            self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).click()
-
-        # Clica no seta da esquerda da tela de funções
-        if clicar_seta_esquerda:
-            xpath = "//button[@class='w-apps__prev']"
-            self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).click()
+        # Pesquisar pelo nome da função no campo de busca
+        if pesquisar_funcao:
+            xpath = "//*[@ng-show='!showLockScreen()']//*[@ng-model='search']"
+            self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).clear()
+            self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).send_keys(tasy_funcao)
 
         # Clicar na função
         xpath = f"//a/span[contains(text(), '{tasy_funcao}')]"
