@@ -43,5 +43,5 @@ class ProntuarioEletronicoPacienteAmbulatorial(Tasy):
 
         # Valida se a tela carregou a conta selecionada (baseado na data fim consulta)
         xpath = f"//div[@id='datagrid']//span[contains(text(),'{dt_consulta}')]"
-        if not self.bot.element_wait_displayed(xpath=xpath):
+        if not self.bot.search_element(xpath=xpath):
             raise Exception([LOG_EX_SISTEMA, 'Consulta não encontrada na tela após selecionada.'])
