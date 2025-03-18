@@ -198,19 +198,6 @@ class Webbot(WebBot):
 
         return False
 
-    def element_wait_displayed(self, xpath: str, tentativas: int = 15) -> bool:
-        """
-        Espera o elemento aparecer ficar visível.
-        :param xpath: XPATH do elemento;
-        :param tentativas: Número de tentativas.
-        :return: True - Se o elemento for encontrado e ficar visível. False se não.
-        """
-        try:
-            self.search_element(xpath, tentativas)
-            return True
-        except:
-            return False
-
     def upload_arquivo_background(self,
                                   xpath_upload: str,
                                   caminho_arquivo: str,

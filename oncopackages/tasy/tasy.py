@@ -227,7 +227,7 @@ class Tasy:
                 raise Exception([LOG_EX_SISTEMA, "Botão (Filtrar) não localizado."])
 
             # Espera o prontuário aparecer na tabela de resultados
-            if not self.bot.element_wait_displayed(f"//div[div/div/span[text()='{prontuario}']]"):
+            if not self.bot.search_element(f"//div[div/div/span[text()='{prontuario}']]"):
                 raise Exception([LOG_EX_NEGOCIO, "Prontuario não localizado."])
 
             # Clica no botão 'Ok'
@@ -236,7 +236,7 @@ class Tasy:
 
             if fechar_ccp:
                 # Espera a tela da função "Cadastro Completo de Pessoa" carregar
-                if not self.bot.element_wait_displayed("//*[text() = 'Todos complementos']"):
+                if not self.bot.search_element("//*[text() = 'Todos complementos']"):
                     raise Exception([LOG_EX_SISTEMA, "Tela de resultado da pesquisa não localizada."])
 
                 # Clica no botão 'Ok' caso apareça algum popup com o título 'Informação'
@@ -249,7 +249,7 @@ class Tasy:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
                 # Verificar se aparece o popup de 'Operação abortada'
-                if self.bot.element_wait_displayed(xpath="//*[text()='Operação abortada']", tentativas=4):
+                if self.bot.search_element(xpath="//*[text()='Operação abortada']", tentativas=4):
                     xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
                     mensagem_erro = self.bot.element_get_text(xpath=xpath)
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro])
@@ -259,7 +259,7 @@ class Tasy:
             self.bot.key_esc(wait=1000)
 
         # Verifica se a pesquisa retornou o prontuário desejado
-        if not self.bot.element_wait_displayed(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
+        if not self.bot.search_element(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
             raise Exception([LOG_EX_SISTEMA, "Tela de resultado da pesquisa não localizada."])
 
     def pesquisar_atendimento(self, atendimento: str) -> None:
@@ -305,7 +305,7 @@ class Tasy:
                 raise Exception([LOG_EX_SISTEMA, "Botão (Filtrar) não localizado."])
 
             # Espera o atendimento aparecer na tabela de resultados
-            if not self.bot.element_wait_displayed(f"//div[div/div/span[text()='{atendimento}']]"):
+            if not self.bot.search_element(f"//div[div/div/span[text()='{atendimento}']]"):
                 raise Exception(["Excecao_Negocio", "Atendimento não localizado."])
 
             # Clica no botão 'Ok'
@@ -317,7 +317,7 @@ class Tasy:
             self.bot.key_esc(wait=1000)
 
         # Espera o campo 'Atendimento' ser atualizado para o atendimento pesquisado
-        if self.bot.element_wait_displayed(xpath=f"//span[@id='NR_ATENDIMENTO']/span[text()='{atendimento}']"):
+        if self.bot.search_element(xpath=f"//span[@id='NR_ATENDIMENTO']/span[text()='{atendimento}']"):
             return
 
         raise Exception([LOG_EX_SISTEMA, "Dados do atendimento não localizados."])
