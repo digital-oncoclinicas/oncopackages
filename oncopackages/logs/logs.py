@@ -49,10 +49,10 @@ class Logger:
             error_message = sys.exc_info()[1]
             print(f'Falha ao enviar o log para o Grafana Loki - {error_line}:{error_message}')
 
-    def salvar_log_erro(self, bot: WebBot = None) -> list:
+    def salvar_log_erro(self, bot: [WebBot] = None) -> list:
         """
         Salva log de erro e o print de tela na pasta do robô.
-        :param bot: Objeto do navegador usado para tirar o print de tela.
+        :param bot: Objeto ou lista de objetos dos navegadores. Usado para tirar o print de tela.
         :return: Lista com [tipo de exceção, mensagem do erro, código do erro]
         """
 
@@ -84,10 +84,22 @@ class Logger:
             error_message = [LOG_EX_SISTEMA, log_message, error_seq]
 
         # Print de tela caso o objeto bot != None
-        if bot and bot.capabilities:
-            try:
-                bot.screenshot(fr'{RPA_DIR_PRINT}\{error_seq}.png')
-            except:
-                pass
+        bot_list = list()
+        if isinstance(bot, WebBot):
+            bot_list.append(bot)
+        else:
+            bot_list = bot
+
+        for n, b in enumerate(bot_list):
+            if b and b.capabilities:
+                if len(bot_list) > 0:
+                    file_name = fr'{RPA_DIR_PRINT}\{error_seq}_{n}.png'
+                else:
+                    file_name = fr'{RPA_DIR_PRINT}\{error_seq}.png'
+
+                try:
+                    b.screenshot(file_name)
+                except:
+                    pass
 
         return error_message
