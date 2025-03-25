@@ -30,7 +30,7 @@ class Webbot(WebBot):
         for n in range(tentativas):
             try:
                 elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
-                for elemento in elementos[::-1]:  # Iterar do último elemento até o primeiro
+                for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
                         return elemento
@@ -51,7 +51,7 @@ class Webbot(WebBot):
         for n in range(tentativas):
             try:
                 elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
-                for elemento in elementos[::-1]:  # Iterar do último elemento até o primeiro
+                for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
                         try:
@@ -76,7 +76,7 @@ class Webbot(WebBot):
         for n in range(tentativas):
             try:
                 elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
-                for elemento in elementos[::-1]:  # Iterar do último elemento até o primeiro
+                for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
                         try:
@@ -102,7 +102,7 @@ class Webbot(WebBot):
         for n in range(tentativas):
             try:
                 elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
-                for elemento in elementos[::-1]:  # Iterar do último elemento até o primeiro
+                for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
                         try:
@@ -128,7 +128,7 @@ class Webbot(WebBot):
         for n in range(tentativas):
             try:
                 elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
-                for elemento in elementos[::-1]:  # Iterar do último elemento até o primeiro
+                for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
                         try:
@@ -183,7 +183,7 @@ class Webbot(WebBot):
         for n in range(tentativas):
             try:
                 elementos = self.find_elements(xpath, By.XPATH, waiting_time=0, ensure_visible=False)
-                for elemento in elementos[::-1]:  # Iterar do último elemento até o primeiro
+                for elemento in elementos:
                     if elemento.is_displayed():
                         self.wait(delay)
                         try:
