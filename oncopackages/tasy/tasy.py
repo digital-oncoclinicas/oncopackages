@@ -13,7 +13,7 @@ class Tasy:
         Realiza o login no Tasy.
         """
         # Abre o navegador e acessa o Tasy
-        self.bot.navigate_to(TASY_URL)
+        self.bot.navigate_to(TASY_URL, is_retry=True)
 
         # Navegador em tela cheia
         self.bot.maximize_window()

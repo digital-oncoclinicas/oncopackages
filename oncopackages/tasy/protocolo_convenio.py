@@ -463,3 +463,4 @@ class ProtocoloConvenio(Tasy):
                 raise Exception([LOG_EX_SISTEMA, "Botão (Protocolo) não localizado."])
             if self.bot.search_element(xpath=f"//div[span='{protocolo}']"):
                 break
+        raise Exception([LOG_EX_SISTEMA, ""])
