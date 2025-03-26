@@ -93,7 +93,7 @@ def salvar_log_erro(bot: [WebBot] = None) -> list:
 
     for n, b in enumerate(bot_list):
         if b and b.capabilities:
-            if len(bot_list) > 0:
+            if len(bot_list) > 1:
                 file_name = fr'{RPA_DIR_PRINT}\{error_seq}_{n}.png'
             else:
                 file_name = fr'{RPA_DIR_PRINT}\{error_seq}.png'
