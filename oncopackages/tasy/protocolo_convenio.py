@@ -358,13 +358,13 @@ class ProtocoloConvenio(Tasy):
         # Valida se a tela de anexos está carregada
         xpath = "//div[@class='wtitle-container margin']//div[contains(text(),'Anexo')]"
         if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True, ensure_clickable=True):
-            # Clica em anexo
-            if not self.bot.element_click(xpath="//div[contains(text(),'Anexo')]", tentativas=2):
+            # Clica na aba "Anexo"
+            if not self.bot.element_click(xpath="//div[span[text()='Anexo']]", tentativas=2):
                 # Clica nos 3 pontinhos para abrir as opções do menu
                 if not self.bot.element_click(xpath="//div[div[div[div[contains(text(),'Anexo')]]]]"):
                     raise Exception([LOG_EX_SISTEMA, "Menu (...) não localizado."])
 
-                # Clica em anexo
+                # Clica no menu "Anexo"
                 if not self.bot.element_click(xpath="//div[contains(text(),'Anexo')]"):
                     raise Exception([LOG_EX_SISTEMA, "Menu (Anexo) não localizado."])
 
