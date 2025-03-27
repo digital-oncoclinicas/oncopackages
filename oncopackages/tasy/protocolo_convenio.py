@@ -358,13 +358,15 @@ class ProtocoloConvenio(Tasy):
         # Valida se a tela de anexos está carregada
         xpath = "//div[@class='wtitle-container margin']//div[contains(text(),'Anexo')]"
         if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True, ensure_clickable=True):
-            # Clica nos 3 pontinhos para abrir as opções do menu
-            if not self.bot.element_click(xpath="//div[div[div[div[contains(text(),'Anexo')]]]]"):
-                raise Exception([LOG_EX_SISTEMA, "Menu (...) não localizado."])
-
             # Clica em anexo
-            if not self.bot.element_click(xpath="//div[contains(text(),'Anexo')]"):
-                raise Exception([LOG_EX_SISTEMA, "Menu (Anexo) não localizado."])
+            if not self.bot.element_click(xpath="//div[contains(text(),'Anexo')]", tentativas=2):
+                # Clica nos 3 pontinhos para abrir as opções do menu
+                if not self.bot.element_click(xpath="//div[div[div[div[contains(text(),'Anexo')]]]]"):
+                    raise Exception([LOG_EX_SISTEMA, "Menu (...) não localizado."])
+
+                # Clica em anexo
+                if not self.bot.element_click(xpath="//div[contains(text(),'Anexo')]"):
+                    raise Exception([LOG_EX_SISTEMA, "Menu (Anexo) não localizado."])
 
         # Pegar a quantidade de arquivos antes de realizar o upload
         qt_arquivos_antes = int(self.bot.element_get_text(xpath="//i[@id = 'totalRecordsPageFinish']"))
