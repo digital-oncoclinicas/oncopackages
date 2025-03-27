@@ -24,5 +24,5 @@ class ProntuarioEletronicoPaciente(Tasy):
         self.bot.search_element(xpath=xpath).click()
 
         # Clica no menu 'Ciclos'
-        xpath = f"//span[contains(text(),'Ciclos')]"
+        xpath = f"//span[@ng-if='!customTemplateFunction' and contains(text(),'Ciclos')]"
         self.bot.search_element(xpath=xpath, delay=1000).click()
