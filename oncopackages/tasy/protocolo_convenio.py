@@ -79,7 +79,7 @@ class ProtocoloConvenio(Tasy):
         self.bot.element_double_click(xpath=f"//div[span='{seq_protocolo}']")
 
         if not self.bot.find_element("//span[contains(text(), 'Procedimentos')]", By.XPATH, ensure_visible=True):
-            raise Exception([LOG_EX_SISTEMA, "Tela de detalhes do procolo não localizada."])
+            raise Exception([LOG_EX_SISTEMA, "Tela de detalhes do protocolo não localizada."])
     
     def alterar_documento_convenio(self, protocolo: str, desc_doc_convenio: str) -> None:
         """
