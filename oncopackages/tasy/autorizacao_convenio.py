@@ -114,7 +114,7 @@ class AutorizacaoConvenio(Tasy):
         self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).click()
     
         # Espera o processamento concluir
-        if not self.bot.element_wait_displayed(xpath="//*[text() = 'Adicionar']"):
+        if not self.bot.search_element(xpath="//*[text() = 'Adicionar']"):
             raise Exception([LOG_EX_SISTEMA, "Não foi possível confirmar a inclusão do histórico."])
     
     def alterar_estagio(self, nome_estagio: str, motivo: str = None, autorizacao: str = None):
@@ -125,7 +125,7 @@ class AutorizacaoConvenio(Tasy):
         :param autorizacao: Sequência da autorização. Necessário caso haja mais de uma autorização na tabela de autorizações.
         """
         # Verifica se está na tela inicial da função "Autorização Convênio"
-        if not self.bot.element_wait_displayed(xpath="//*[contains(text(),'Relatórios')]"):
+        if not self.bot.search_element(xpath="//*[contains(text(),'Relatórios')]"):
             mensagem_erro = "Tela inicial da função Autorização Convênio não localizada."
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
@@ -157,7 +157,7 @@ class AutorizacaoConvenio(Tasy):
     
         # Verificar se aparece o popup de confirmação
         xpath = "//div[text()='Confirmação' or text()='Informação']"
-        if self.bot.element_wait_displayed(xpath=xpath, tentativas=4):
+        if self.bot.search_element(xpath=xpath, tentativas=4):
             self.bot.find_element("//button[text()='Ok']", By.XPATH).click()
     
         # Verificar se o estágio foi alterado
@@ -304,7 +304,7 @@ class AutorizacaoConvenio(Tasy):
     
         # Espera a tela carregar
         xpath = "//span[text() = 'Material TUSS']"
-        if not self.bot.element_wait_displayed(xpath=xpath, tentativas=10):
+        if not self.bot.search_element(xpath=xpath, tentativas=10):
             raise Exception([LOG_EX_SISTEMA, "Tela de materiais não localizada."])
     
         # Aumenta o número de autorizações que são visualizadas na tabela. Ele pode n existir, por isso não tem raise.
@@ -475,7 +475,7 @@ class AutorizacaoConvenio(Tasy):
             # Clica em 'Filtrar'
             self.bot.element_click("//button[contains(text(),'Filtrar')]")
             # Espera o procedimento aparecer na tabela de resultados
-            if not self.bot.element_wait_displayed(f"//div[span[text()='{procedimento}']]"):
+            if not self.bot.search_element(f"//div[span[text()='{procedimento}']]"):
                 raise Exception([LOG_EX_NEGOCIO, f"Procedimento ({procedimento}) não localizado."])
             self.bot.element_click("//button[span[text()='Ok']]")
             # Espera o Tasy trazer a descrição do medicamento
@@ -505,7 +505,7 @@ class AutorizacaoConvenio(Tasy):
             raise Exception([LOG_EX_SISTEMA, "Botão (Salvar) não localizado."])
     
         # Verifica se salvou com sucesso
-        if not self.bot.element_wait_displayed(xpath=f"//span[text() = '{autorizacao}']", tentativas=60):
+        if not self.bot.search_element(xpath=f"//span[text() = '{autorizacao}']", tentativas=60):
             mensagem_erro = "Não foi possível confirmar a adição da nova autorização."
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
@@ -550,7 +550,7 @@ class AutorizacaoConvenio(Tasy):
     
         # Verifica se salvou com sucesso
         xpath = f"//div[div[div[span[text() = '{autorizacao}']]] and div[div[span[text() = '{atendimento}']]]]"
-        if self.bot.element_wait_displayed(xpath=xpath):
+        if self.bot.search_element(xpath=xpath):
             return
     
         raise Exception([LOG_EX_SISTEMA, "Não foi possível confirmar o vínculo do atendimento."])
@@ -565,7 +565,7 @@ class AutorizacaoConvenio(Tasy):
             raise Exception([LOG_EX_SISTEMA, "Autorização não localizada."])
     
         # Espera a tela carregar
-        if not self.bot.element_wait_displayed("//div[contains(text(), 'Autorização procedimento')]"):
+        if not self.bot.search_element("//div[contains(text(), 'Autorização procedimento')]"):
             raise Exception([LOG_EX_SISTEMA, "Tela com dados da autorização não localizada."])
     
     def retornar_tabela_autorizacoes(self) -> None:
@@ -576,7 +576,7 @@ class AutorizacaoConvenio(Tasy):
         self.bot.find_element("//div[div[text() = 'Guia']]", By.XPATH, ensure_clickable=True).click()
     
         # Espera a tela carregar
-        if not self.bot.element_wait_displayed(xpath="//div[contains(text(), 'Autorizações')]"):
+        if not self.bot.search_element(xpath="//div[contains(text(), 'Autorizações')]"):
             raise Exception([LOG_EX_SISTEMA, "Tela de autorizações não localizada."])
     
     def limpar_filtro_autorizacao(self):

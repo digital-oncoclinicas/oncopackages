@@ -66,7 +66,7 @@ class ContaPaciente(Tasy):
             self.bot.element_double_click(xpath=xpath, delay=1000)
 
             # Valido carregamento da tela de detalhes da conta
-            if not self.bot.element_wait_displayed(xpath="//span[contains(text(), 'Procedimentos')]"):
+            if not self.bot.search_element(xpath="//span[contains(text(), 'Procedimentos')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de detalhes da conta não localizada."])
 
         except Exception:
@@ -100,7 +100,7 @@ class ContaPaciente(Tasy):
 
             # Valida se a guia foi substituída com sucesso
             for n in range(10):  # Verificar se a guia aparece na tabela
-                if not self.bot.element_wait_displayed(xpath=f"//span[text()='Substituir guia']", tentativas=1):
+                if not self.bot.search_element(xpath=f"//span[text()='Substituir guia']", tentativas=1):
                     return
                 self.bot.wait(500)
 
@@ -130,7 +130,7 @@ class ContaPaciente(Tasy):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Substituir senha) não localizada."])
 
             # Aguarda pop-up 'Substituir senha' carregar
-            if not self.bot.element_wait_displayed(xpath="//input[@name='DS_NOVA_SENHA']"):
+            if not self.bot.search_element(xpath="//input[@name='DS_NOVA_SENHA']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up (Substituir senha) não localizado."])
 
             # Flega o check-box 'Substituir todas'
@@ -152,7 +152,7 @@ class ContaPaciente(Tasy):
 
             # Valida se a senha foi substituída com sucesso
             for n in range(10):  # Verificar se a senha aparece na tabela
-                if not self.bot.element_wait_displayed(xpath=f"//span[text()='Substituir senha']", tentativas=1):
+                if not self.bot.search_element(xpath=f"//span[text()='Substituir senha']", tentativas=1):
                     return
                 self.bot.wait(500)
 
@@ -190,7 +190,7 @@ class ContaPaciente(Tasy):
 
             # Valida se retornou para a tela inicial
             for n in range(10):
-                if not self.bot.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
+                if not self.bot.search_element(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
                     return
                 self.bot.wait(500)
 
@@ -218,7 +218,7 @@ class ContaPaciente(Tasy):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Atualizar conta TISS) não localizada."])
 
             # Aguarda pop-up de confirmação
-            if not self.bot.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']"):
+            if not self.bot.search_element(xpath="//div[text()='Conta atualizada com sucesso!']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up de confirmação não localizado."])
 
             # Clica em 'Ok'
@@ -227,7 +227,7 @@ class ContaPaciente(Tasy):
 
             # Valida se retornou para a tela inicial
             for n in range(10):
-                if not self.bot.element_wait_displayed(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
+                if not self.bot.search_element(xpath="//div[text()='Conta atualizada com sucesso!']", tentativas=1):
                     return
                 self.bot.wait(500)
 
@@ -295,7 +295,7 @@ class ContaPaciente(Tasy):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Opção (Muda status conta) não localizada."])
 
             # Verificar se aparece o pop-up de inconsistência
-            if self.bot.element_wait_displayed(xpath="//div[contains(text(),'Inconsistências')]", tentativas=6):
+            if self.bot.search_element(xpath="//div[contains(text(),'Inconsistências')]", tentativas=6):
                 raise Exception([LOG_EX_NEGOCIO, "Popup (Inconsistências) encontrado."])
 
             # Aguardar o popup de 'Consistência' (demora bastante)
@@ -323,7 +323,7 @@ class ContaPaciente(Tasy):
 
             # Valida se retornou para a tela inicial
             for n in range(10):
-                if not self.bot.element_wait_displayed(xpath="//div[@title='Consistência']", tentativas=1):
+                if not self.bot.search_element(xpath="//div[@title='Consistência']", tentativas=1):
                     return
                 self.bot.wait(500)
 
@@ -343,7 +343,7 @@ class ContaPaciente(Tasy):
         mensagem_erro = "Falha ao inserir a conta no protocolo. "
         try:
             # Aguarda o carregamento do pop-up de inserir no protocolo
-            if not self.bot.element_wait_displayed(xpath="//span[text()='Inserir no protocolo']"):
+            if not self.bot.search_element(xpath="//span[text()='Inserir no protocolo']"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up (Inserir no protocolo) não localizado."])
 
             # Preencher o campo 'Nome'
@@ -360,13 +360,13 @@ class ContaPaciente(Tasy):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Pop-up de Confirmação não foi localizado."])
 
             # A conta foi inserida com sucesso se aparecer o popup 'Atenção' com a quantidade de contas no protocolo
-            if self.bot.element_wait_displayed(xpath="//div[text()='Atenção']"):
+            if self.bot.search_element(xpath="//div[text()='Atenção']"):
                 # Clica em 'Ok'
                 self.bot.element_click(xpath="//button[text()='Ok']")
                 return
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=4):
+            if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=4):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
                 mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
@@ -452,11 +452,11 @@ class ContaPaciente(Tasy):
 
             # Verificar se salvou com sucesso
             xpath = "//div[div[span[contains(text(),'Setor')]] and div[span[text()='Básica']]]"
-            if self.bot.element_wait_displayed(xpath=xpath):
+            if self.bot.search_element(xpath=xpath):
                 return
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
                 mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
@@ -517,11 +517,11 @@ class ContaPaciente(Tasy):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (Salvar) não localizado."])
 
             # Verificar se a conta criada aparece na tabela de contas
-            if self.bot.element_wait_displayed(xpath=f"//span[text()='{conta}']", tentativas=20):
+            if self.bot.search_element(xpath=f"//span[text()='{conta}']", tentativas=20):
                 return conta
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
                 mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
@@ -561,7 +561,7 @@ class ContaPaciente(Tasy):
                 cd_procedimento = self.bot.element_get_value(xpath="//input[@name='CD_PROCEDIMENTO']", tentativas=1)
                 if cd_procedimento != "":
                     break
-                if self.bot.element_wait_displayed(xpath="//div[contains(text(),'Informação')]", tentativas=2):
+                if self.bot.search_element(xpath="//div[contains(text(),'Informação')]", tentativas=2):
                     xpath = "//div[div[div[div[contains(text(),'Informação')]]]]/div[2]/div"
                     mensagem_erro += self.bot.element_get_text(xpath=xpath)
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro])
@@ -602,17 +602,17 @@ class ContaPaciente(Tasy):
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
 
             # Verificar se a taxa criada aparece na tabela de taxas
-            # if self.bot.element_wait_displayed(xpath=f"//div[span[text()='{sequencia}']]"):
+            # if self.bot.search_element(xpath=f"//div[span[text()='{sequencia}']]"):
             #     return
             if self.bot.bd_tasy.confirmar_taxa_adicionada(nr_sequencia=sequencia):
                 # Às vezes aparece um pop-up de "Informação". Clica em 'Ok'
-                if self.bot.element_wait_displayed(xpath="//div[contains(text(),'Informação')]", tentativas=4):
+                if self.bot.search_element(xpath="//div[contains(text(),'Informação')]", tentativas=4):
                     if not self.bot.element_click(xpath="//button[contains(text(),'Ok')]"):
                         raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Botão (OK) não localizado."])
                 return
 
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.bot.element_wait_displayed(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
                 mensagem_erro += self.bot.element_get_text(xpath=xpath)
 
@@ -632,7 +632,7 @@ class ContaPaciente(Tasy):
             self.bot.element_click(xpath="//div[div[text()='Conta']]", tentativas=4)
 
             # Valido carregamento da tela de detalhes da conta
-            if not self.bot.element_wait_displayed(xpath="//div[contains(text(),'Contas')]"):
+            if not self.bot.search_element(xpath="//div[contains(text(),'Contas')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de contas não localizada."])
 
         except Exception:
@@ -649,7 +649,7 @@ class ContaPaciente(Tasy):
             self.bot.element_click(xpath="//div[div[text()='Conta']]", tentativas=4)
 
             # Valido carregamento da tela de detalhes da conta
-            if not self.bot.element_wait_displayed(xpath="//div[contains(text(),'Contas')]"):
+            if not self.bot.search_element(xpath="//div[contains(text(),'Contas')]"):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de contas não localizada."])
 
         except Exception:

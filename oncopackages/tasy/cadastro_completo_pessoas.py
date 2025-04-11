@@ -90,8 +90,8 @@ class CadastroCompletoPessoas(Tasy):
                 if not self.bot.find_element(xpath, By.XPATH, ensure_visible=True):
                     raise Exception([LOG_EX_SISTEMA, "Não foi possível confirmar a atualização."])
     
-    def adicionar_classificacao_paciente(self, classificacao: str, data_fim_vigencia: str = '',
-                                         data_inicio_vigencia: str = ''):
+    def adicionar_classificacao_paciente(self, classificacao: str, data_inicio_vigencia: str = '',
+                                         data_fim_vigencia: str = ''):
         """
         Informa a Classificação, a data fim de vigência, o campo observação e salva.
         :param classificacao: Classificação do paciente;
@@ -113,7 +113,7 @@ class CadastroCompletoPessoas(Tasy):
         # Preencher campo 'Início vigência'
         if data_inicio_vigencia != '':
             xpath = "//*[@name= 'DT_INICIO_VIGENCIA']"
-            if not self.bot.element_wait_displayed(xpath=xpath):
+            if not self.bot.search_element( xpath=xpath):
                 raise Exception([LOG_EX_SISTEMA, "Campo (Início da vigência) não localizado."])
             self.bot.find_element(selector=xpath, by=By.XPATH).click()
             self.bot.type_keys(keys=[Keys.CONTROL, "a"])
@@ -130,7 +130,7 @@ class CadastroCompletoPessoas(Tasy):
         self.bot.find_element(xpath, By.XPATH, ensure_clickable=True).click()
 
         # Verifica se salvou com sucesso
-        if self.bot.element_wait_displayed(xpath=f"//*[contains(text(), '{classificacao}')]"):
+        if self.bot.search_element(xpath=f"//*[contains(text(), '{classificacao}')]"):
             return
 
         raise Exception("Adição não confirmada.")

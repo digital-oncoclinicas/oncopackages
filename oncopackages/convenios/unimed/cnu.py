@@ -102,7 +102,7 @@ class Portal:
                 return
     
             # Verificar se a senha está errada
-            if self.bot.element_wait_displayed(xpath="//span[contains(text(),'Tente novamente')]", tentativas=1):
+            if self.bot.search_element(xpath="//span[contains(text(),'Tente novamente')]", tentativas=1):
                 raise Exception([LOG_EX_NEGOCIO, mensagem_erro + "Senha/Login Incorreto."])
     
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
@@ -133,14 +133,14 @@ class Portal:
                     self.login(usuario=cnu_user, senha=cnu_pwd)
     
                 # Acessando o menu 'Autorização'
-                if not self.bot.element_wait_displayed(xpath="//*[text()='Elegibilidade']", tentativas=4):
+                if not self.bot.search_element(xpath="//*[text()='Elegibilidade']", tentativas=4):
                     self.bot.navigate_to("https://www1.centralnacionalunimed.com.br/auto/blank.jsf")
     
                 # Clica no menu 'Elegibilidade'
                 if self.bot.element_left_click(xpath="//*[@id='frmMenuElegibilidade']", delay=500):
                     break
     
-            if not self.bot.element_wait_displayed(xpath="//span[text()='Elegibilidade']", tentativas=4):
+            if not self.bot.search_element(xpath="//span[text()='Elegibilidade']", tentativas=4):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "Tela de pesquisa não localizada."])
     
             # Preencher o campo 'Código Prestador:'
@@ -152,7 +152,7 @@ class Portal:
             self.bot.tab()
     
             # Espera retorno do site
-            if not self.bot.element_wait_displayed(xpath="//input[@value='Imagem da Carteirinha']", tentativas=60):
+            if not self.bot.search_element(xpath="//input[@value='Imagem da Carteirinha']", tentativas=60):
                 raise Exception([LOG_EX_SISTEMA, mensagem_erro + "O portal não retornou um resultado."])
     
             # Pega validade da carteirinha
