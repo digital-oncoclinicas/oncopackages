@@ -91,12 +91,12 @@ class CadastroCompletoPessoas(Tasy):
                     raise Exception([LOG_EX_SISTEMA, "Não foi possível confirmar a atualização."])
     
     def adicionar_classificacao_paciente(self, classificacao: str, data_inicio_vigencia: str = '',
-                                         data_fim_vigencia: str = ''):
+                                         data_final_vigencia: str = ''):
         """
         Informa a Classificação, a data fim de vigência, o campo observação e salva.
         :param classificacao: Classificação do paciente;
         :param data_inicio_vigencia: Data de início da vigência da classificação
-        :param data_fim_vigencia: Data fim de vigência.
+        :param data_final_vigencia: Data fim de vigência.
         """
         # Clica no botão 'Adicionar'
         xpath = "//div[div[div[div[contains(text(), 'Classificações do paciente')]]]]" \
@@ -120,9 +120,9 @@ class CadastroCompletoPessoas(Tasy):
             self.bot.kb_type(data_inicio_vigencia)
 
         # Preencher campo 'Fim vigência'
-        if data_fim_vigencia != '':
+        if data_final_vigencia != '':
             xpath = "//*[@name= 'DT_FINAL_VIGENCIA']"
-            if not self.bot.element_set_text(xpath=xpath, text=data_fim_vigencia, delay=1000):
+            if not self.bot.element_set_text(xpath=xpath, text=data_final_vigencia, delay=1000):
                 raise Exception([LOG_EX_SISTEMA, "Campo (Final vigência) não localizado."])
 
         # Clica no botão 'Salvar'
