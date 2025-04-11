@@ -321,30 +321,3 @@ class Tasy:
             return
 
         raise Exception([LOG_EX_SISTEMA, "Dados do atendimento não localizados."])
-
-    def esperar_conclusao_download(self, extensao_arquivo: str = '.pdf', timeout: int = 30000) -> str:
-        """
-        Espera a conclusão do download do arquivo e retorna o diretório completo dele.
-        :param extensao_arquivo: Formato do arquivo que será baixado. Exemplo: .pdf, .png, .xlsx...
-        :param timeout: Tempo máximo de espera pela conclusão do download.
-        :return: Diretório completo do arquivo baixado.
-        """
-        # Conta a quantidade de arquivos na pasta de downloads com a mesma extensão do arquivo que será baixado
-        qt_arquivos_antes = self.bot.get_file_count(file_extension=extensao_arquivo)
-
-        # Espera a conclusão do download por até timeout segundos
-        qt_arquivos_apos = 0
-        for i in range(int(timeout / 500)):
-            qt_arquivos_apos = self.bot.get_file_count(file_extension=extensao_arquivo)
-            if qt_arquivos_apos > qt_arquivos_antes:
-                break
-            self.bot.wait(500)
-
-        if qt_arquivos_apos <= qt_arquivos_antes:
-            raise Exception([LOG_EX_SISTEMA, f'Tempo de espera excedido.'])
-
-        # Pega o diretório completo do arquivo baixado
-        dir_arquivo = self.bot.get_last_created_file(path=RPA_DIR_DOWNLOADS)
-
-        return dir_arquivo
-
