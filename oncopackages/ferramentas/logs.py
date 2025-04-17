@@ -49,7 +49,7 @@ def __gerar_sequencia_erro(function_name: str, error_line: int, error_message: s
         print(f'Falha ao enviar o log para o Grafana Loki - {error_line}:{error_message}')
 
 
-def salvar_log_erro(bot: list[object]|object = None) -> list:
+def salvar_log_erro(bot: object|list[object] = None) -> list:
     """
     Salva log de erro e o print de tela na pasta do robô.
     :param bot: Objeto ou lista de objetos dos navegadores. Usado para tirar o print de tela.

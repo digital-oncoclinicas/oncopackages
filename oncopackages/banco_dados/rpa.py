@@ -1,6 +1,5 @@
 from config import (RPA_DB_NAME, RPA_DB_USER, RPA_DB_SERVER, RPA_DB_PWD, RPA_SHORT_NAME, LOG_EX_SISTEMA,
                     LOG_EX_NEGOCIO, RPA_DIR_PRINT, LOG_MESSAGES)
-from botcity.web import WebBot
 import traceback
 import pyodbc
 import socket
@@ -66,7 +65,7 @@ class BancoDadosRpa:
             error_message = sys.exc_info()[1]
             print(f'Falha ao salvar o log de erro no banco de dados - {error_line}:{error_message}')
 
-    def salvar_log_erro(self, bot: WebBot = None) -> list:
+    def salvar_log_erro(self, bot: object|list[object] = None) -> list:
         """
         Salva log de erro no banco de dados e o print de tela na pasta do robô.
         :param bot: Objeto do navegador usado para tirar o print de tela.
@@ -101,9 +100,20 @@ class BancoDadosRpa:
             error_message = [LOG_EX_SISTEMA, log_message, error_seq]
 
         # Print de tela caso o objeto bot != None
-        if bot and bot.capabilities:
+        bot_list = list()
+        if isinstance(bot, list):
+            bot_list = bot
+        elif bot:
+            bot_list.append(bot)
+
+        for n, b in enumerate(bot_list):
+            if len(bot_list) > 1:
+                file_name = fr'{RPA_DIR_PRINT}\{error_seq}_{n}.png'
+            else:
+                file_name = fr'{RPA_DIR_PRINT}\{error_seq}.png'
+
             try:
-                bot.screenshot(fr'{RPA_DIR_PRINT}\{error_seq}.png')
+                b.screenshot(file_name)
             except:
                 pass
 
