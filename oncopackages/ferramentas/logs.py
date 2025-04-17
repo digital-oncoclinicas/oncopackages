@@ -1,6 +1,5 @@
 from config import RPA_SHORT_NAME, LOG_EX_SISTEMA, LOG_EX_NEGOCIO, RPA_DIR_PRINT, LOG_MESSAGES
 from multiprocessing import Queue
-from botcity.web import WebBot
 from datetime import datetime
 import logging_loki
 import traceback
@@ -50,7 +49,7 @@ def __gerar_sequencia_erro(function_name: str, error_line: int, error_message: s
         print(f'Falha ao enviar o log para o Grafana Loki - {error_line}:{error_message}')
 
 
-def salvar_log_erro(bot: [WebBot] = None) -> list:
+def salvar_log_erro(bot: list[object]|object = None) -> list:
     """
     Salva log de erro e o print de tela na pasta do robô.
     :param bot: Objeto ou lista de objetos dos navegadores. Usado para tirar o print de tela.
@@ -86,21 +85,20 @@ def salvar_log_erro(bot: [WebBot] = None) -> list:
 
     # Print de tela caso o objeto bot != None
     bot_list = list()
-    if isinstance(bot, WebBot):
-        bot_list.append(bot)
-    elif bot:
+    if isinstance(bot, list):
         bot_list = bot
+    elif bot:
+        bot_list.append(bot)
 
     for n, b in enumerate(bot_list):
-        if b and b.capabilities:
-            if len(bot_list) > 1:
-                file_name = fr'{RPA_DIR_PRINT}\{error_seq}_{n}.png'
-            else:
-                file_name = fr'{RPA_DIR_PRINT}\{error_seq}.png'
+        if len(bot_list) > 1:
+            file_name = fr'{RPA_DIR_PRINT}\{error_seq}_{n}.png'
+        else:
+            file_name = fr'{RPA_DIR_PRINT}\{error_seq}.png'
 
-            try:
-                b.screenshot(file_name)
-            except:
-                pass
+        try:
+            b.screenshot(file_name)
+        except:
+            pass
 
     return error_message
