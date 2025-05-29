@@ -27,6 +27,10 @@ class Tasy:
         # Entrar
         self.bot.enter()
 
+        # Verificar se aparece o popup de 'Atenção'. Clicar em 'Ok' caso apareça
+        if self.bot.find_element("//*[contains(text(), 'Atenção')]", By.XPATH, waiting_time=5000):
+            self.bot.find_element("//*[contains(text(), 'Ok')]", By.XPATH, waiting_time=0).click()
+
         # Verificar se o login foi realizado com sucesso
         if self.bot.find_element("//a[text() = 'Funções']", By.XPATH, waiting_time=60000):
             return
