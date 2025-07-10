@@ -213,10 +213,9 @@ class Tasy:
 
         # Se for a primeira pesquisa ou não for possível realizar a pesquisa pelo com o fluxo anterior
         # realizar o filtro a partir do botão com o símbolo da lupa.
-        if consulta_realizada is False:
+        if not consulta_realizada:
             # Clicar no ícone de Pesquisar que fica no canto superior esquerdo
-            if not self.bot.element_click("//div[div[@class='person-icon-finder']]"):
-                raise Exception([LOG_EX_SISTEMA, "Ícone de pesquisa (Lupa) não localizado."])
+            self.bot.element_click("//div[div[@class='person-icon-finder']]", tentativas=2)
 
             # Ativa a aba 'Pessoa'
             if not self.bot.element_click("//div[span[text()='Pessoa']]", delay=2000):
