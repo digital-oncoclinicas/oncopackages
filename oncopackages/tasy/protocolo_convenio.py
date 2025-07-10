@@ -371,6 +371,9 @@ class ProtocoloConvenio(Tasy):
         # Pegar a quantidade de arquivos antes de realizar o upload
         qt_arquivos_antes = int(self.bot.element_get_text(xpath="//i[@id = 'totalRecordsPageFinish']"))
 
+        # Clicar na aba 'Anexos do protocolo do convênio'
+        self.bot.search_element(xpath="//div[span[text()='Anexos do protocolo do convênio']]", delay=500).click()
+
         # Clica em adicionar
         if not self.bot.element_click(xpath="//*[contains(text(),'Adicionar')]"):
             raise Exception([LOG_EX_SISTEMA, "Botão (Adicionar) não localizado."])
