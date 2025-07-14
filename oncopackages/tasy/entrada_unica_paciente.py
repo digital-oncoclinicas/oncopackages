@@ -46,9 +46,11 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.find_element("DT_ENTRADA", By.NAME).send_keys(data_entrada)
 
         # Preenche o campo 'Clínica do atendimento'
-        self.bot.element_click(xpath="//div[input[@name='IE_CLINICA'] and @tabindex='0']")
-        if not self.bot.element_click(xpath=f"//a[span[text()='{clinica_atendimento}']]", delay=1000):
-            raise Exception([LOG_EX_NEGOCIO, f"Clinica do atendimento ({clinica_atendimento}) não localizada."])
+        clinica_atendimento_atual = self.bot.search_element(xpath="//div[input[@name='IE_CLINICA'] and @tabindex='0']").text
+        if clinica_atendimento_atual != clinica_atendimento:
+            self.bot.search_element(xpath="//div[input[@name='IE_CLINICA'] and @tabindex='0']").click()
+            if not self.bot.element_click(xpath=f"//a[span[text()='{clinica_atendimento}']]", delay=1000):
+                raise Exception([LOG_EX_NEGOCIO, f"Clinica do atendimento ({clinica_atendimento}) não localizada."])
 
         # Preenche o campo 'Procedência'
         self.bot.element_click(xpath="//div[input[@name='CD_PROCEDENCIA']]")
@@ -112,7 +114,7 @@ class EntradaUnicaPaciente(Tasy):
 
         # Verificar se aparece o popup de 'Confirmação'
         if self.bot.search_element(xpath="//div[text()='Confirmação']", tentativas=3):
-            self.bot.search_element(xpath="//*[contains(text(),'Ok')]").click()
+            self.bot.search_element(xpath="//*[contains(text(),'Cancelar')]").click()
 
         # Verificar se o atendimento criado aparece na tabela de atendimentos
         if self.bot.search_element(xpath=f"//span[text()='{atendimento}']", tentativas=20):
