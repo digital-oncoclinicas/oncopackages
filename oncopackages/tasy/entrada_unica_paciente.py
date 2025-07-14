@@ -8,19 +8,9 @@ class EntradaUnicaPaciente(Tasy):
     def adicionar_atendimento(self, tipo_atendimento: str, clinica_atendimento: str, procedencia: str,
                               tipo_convenio: str, classificacao_atendimento: str, carater_atendimento: str = "",
                               tipo_acidente: str = "", tipo_atendimento_tiss: str = "", data_entrada: str = "",
-                              cd_medico_atendente: str = "") -> str:
+                              cd_medico_atendente: str = "", observacao: str = "") -> str:
         """
         Adiciona um novo atendimento na função Entrada Única de Pacientes do Tasy.
-        :param tipo_atendimento: Tipo de atendimento;
-        :param clinica_atendimento: Clínica do atendimento;
-        :param procedencia: Procedência;
-        :param tipo_convenio: Tipo de convênio;
-        :param classificacao_atendimento: Classificação do atendimento;
-        :param carater_atendimento: Caráter do atendimento;
-        :param tipo_acidente: Tipo de acidente;
-        :param tipo_atendimento_tiss: Tipo de atendimento TISS;
-        :param data_entrada: Data da entrada;
-        :param cd_medico_atendente: Código do médico atendente;
         :return: Número do atendimento criado.
         """
         # Se a tela de atendimentos ainda não estiver no modo de edição, clica em 'Adicionar'
@@ -39,7 +29,7 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.element_click(xpath="//div[input[@name='IE_TIPO_ATENDIMENTO']]", delay=1000, tentativas=4)
             self.bot.element_click(xpath=f"//a[span[text()='{tipo_atendimento}']]", delay=1000, tentativas=2)
             self.bot.tab()
-            tipo_atendimento_atual = self.bot.self.bot.element_get_text(xpath="//div[input[@name='IE_TIPO_ATENDIMENTO']]")
+            tipo_atendimento_atual = self.bot.element_get_text(xpath="//div[input[@name='IE_TIPO_ATENDIMENTO']]")
             if tipo_atendimento == tipo_atendimento_atual:
                 break
             self.bot.wait(500)
@@ -70,7 +60,7 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.element_set_text(xpath="//input[@name='CD_MEDICO_RESP']", text=cd_medico_atendente)
         else:
             #  Clicando no campo ele preenche automaticamente
-            self.bot.self.bot.element_left_click(xpath="//input[@name='CD_MEDICO_RESP']")
+            self.bot.element_left_click(xpath="//input[@name='CD_MEDICO_RESP']")
         cd_medico_atendente_atual = ''
         for n in range(10):
             cd_medico_atendente_atual = self.bot.element_get_value(xpath="//input[@name='CD_MEDICO_RESP']")
@@ -83,7 +73,7 @@ class EntradaUnicaPaciente(Tasy):
                 raise Exception([LOG_EX_SISTEMA, f"Falha ao preencher o campo Clinida de atendimento."])
 
         # Preenche o campo 'Tipo do convênio'
-        tipo_convenio_atual = self.bot.self.bot.element_get_text(xpath="//div[input[@name='IE_TIPO_CONVENIO']]")
+        tipo_convenio_atual = self.bot.element_get_text(xpath="//div[input[@name='IE_TIPO_CONVENIO']]")
         if tipo_convenio != tipo_convenio_atual:
             self.bot.element_click(xpath="//div[input[@name='IE_TIPO_CONVENIO']]")
             if not self.bot.element_click(xpath=f"//a[span[text()='{tipo_convenio}']]", delay=1000):
@@ -92,7 +82,7 @@ class EntradaUnicaPaciente(Tasy):
         # Preenche o campo 'Caráter do atendimento'
         if carater_atendimento != "":
             self.bot.element_click(xpath="//div[input[@name='IE_CARATER_INTER_SUS']]")
-            if not self.bot.element_click(xpath=f"//a[span[text()='{carater_atendimento}']]", delay=1000):
+            if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{carater_atendimento}')]]", delay=1000):
                 raise Exception([LOG_EX_NEGOCIO, f"Caráter do atendimento ({carater_atendimento}) não localizado."])
 
         # Preenche o campo 'Tipo do acidente'
@@ -112,19 +102,27 @@ class EntradaUnicaPaciente(Tasy):
             if not self.bot.element_click(xpath=f"//a[span[text()='{tipo_atendimento_tiss}']]", delay=1000):
                 raise Exception([LOG_EX_NEGOCIO, f"Tipo de atendimento TISS ({tipo_atendimento_tiss}) não localizado."])
 
+        # Preenche o campo 'Observação'
+        if observacao != "":
+            self.bot.search_element(xpath="//*[@name='DS_OBSERVACAO']").send_keys(observacao)
+
         # Clica no botão 'Salvar'
         if not self.bot.element_click(xpath="//div[div[div[span[text()='Salvar']]]]"):
             raise Exception([LOG_EX_SISTEMA, f"Botão (Salvar) não localizado."])
 
+        # Verificar se aparece o popup de 'Confirmação'
+        if self.bot.search_element(xpath="//div[text()='Confirmação']", tentativas=3):
+            self.bot.search_element(xpath="//*[contains(text(),'Ok')]").click()
+
         # Verificar se o atendimento criado aparece na tabela de atendimentos
-        if self.bot.self.bot.search_element(xpath=f"//span[text()='{atendimento}']", tentativas=40):
+        if self.bot.search_element(xpath=f"//span[text()='{atendimento}']", tentativas=20):
             return atendimento
 
         # Verificar se aparece o popup de 'Operação abortada'
         mensagem_erro = ''
-        if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+        if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
             xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
-            mensagem_erro = self.bot.self.bot.element_get_text(xpath=xpath)
+            mensagem_erro = self.bot.element_get_text(xpath=xpath)
 
         raise Exception([LOG_EX_SISTEMA, mensagem_erro])
     
@@ -155,7 +153,7 @@ class EntradaUnicaPaciente(Tasy):
             # Se a aba "Setores" estiver ativa, é necessário clicar em "Cancelar", clicar em "Sair sem salvar" e clicar
             # na aba "Convênio"
             xpath = "//span[contains(text(), 'Setor de atendimento do paciente')]"
-            if self.bot.self.bot.search_element(xpath=xpath, waiting_time=2):
+            if self.bot.search_element(xpath=xpath, waiting_time=2):
                 # Clicar em "Cancelar"
                 self.bot.search_element(xpath="//*[*[*[*[contains(text(), 'Cancelar')]]]]").click()
                 # No popup, clicar em "Sair sem salvar"
@@ -170,14 +168,14 @@ class EntradaUnicaPaciente(Tasy):
                     raise Exception([LOG_EX_SISTEMA, f"Botão (Adicionar) não localizado."])
 
         # Preenche o campo 'Convênio'
-        convenio_atual = self.bot.self.bot.element_get_text(xpath="//div[input[@name='CD_CONVENIO']]//span", delay=1000)
+        convenio_atual = self.bot.element_get_text(xpath="//div[input[@name='CD_CONVENIO']]//span", delay=1000)
         if convenio != "" and convenio != convenio_atual:
             self.bot.element_click(xpath="//div[input[@name='CD_CONVENIO']]", delay=1000)
             if not self.bot.element_click(xpath=f"//a[span[text()='{convenio}']]", delay=1000):
                 raise Exception([LOG_EX_NEGOCIO, f"Convênio ({convenio}) não localizado."])
 
         # Preenche o campo 'Categoria'
-        categoria_atual = self.bot.self.bot.element_get_text(xpath="//div[input[@name='CD_CATEGORIA']]//span")
+        categoria_atual = self.bot.element_get_text(xpath="//div[input[@name='CD_CATEGORIA']]//span")
         if categoria != "" and categoria != categoria_atual:
             self.bot.element_click(xpath="//div[input[@name='CD_CATEGORIA']]", tentativas=4)
             if not self.bot.element_click(xpath=f"//a[span[text()='{categoria}']]", delay=1000, tentativas=4):
@@ -191,19 +189,19 @@ class EntradaUnicaPaciente(Tasy):
                 raise Exception([LOG_EX_NEGOCIO, f"Tipo de acomodação ({tipo_acomodacao}) não localizada."])
 
         # Preenche o campo 'Código do usuário'
-        codigo_usuario_atual = self.bot.self.bot.element_get_value(xpath="//input[@name='CD_USUARIO_CONVENIO']")
+        codigo_usuario_atual = self.bot.element_get_value(xpath="//input[@name='CD_USUARIO_CONVENIO']")
         if codigo_usuario != "" and codigo_usuario != codigo_usuario_atual:
             self.bot.element_set_text(xpath="//input[@name='CD_USUARIO_CONVENIO']", text=codigo_usuario, tentativas=4)
             self.bot.tab()
 
         # Preenche o campo 'Complemento'
-        complemento_atual = self.bot.self.bot.element_get_value(xpath="//input[@name='CD_COMPLEMENTO']")
+        complemento_atual = self.bot.element_get_value(xpath="//input[@name='CD_COMPLEMENTO']")
         if complemento != "" and complemento != complemento_atual:
             self.bot.element_set_text(xpath="//input[@name='CD_COMPLEMENTO']", text=complemento, tentativas=4)
             self.bot.tab()
 
         # Preenche o campo 'Data de validade'
-        data_validade_atual = self.bot.self.bot.element_get_value(xpath="//input[@name='DT_VALIDADE_CARTEIRA']")
+        data_validade_atual = self.bot.element_get_value(xpath="//input[@name='DT_VALIDADE_CARTEIRA']")
         if data_validade != "" and data_validade != data_validade_atual:
             self.bot.element_set_text(xpath="//input[@name='DT_VALIDADE_CARTEIRA']", text=data_validade, tentativas=4)
             self.bot.tab()
@@ -232,13 +230,13 @@ class EntradaUnicaPaciente(Tasy):
         # Preenche o campo 'Guia'
         guia_atual = self.bot.element_get_value(xpath="//input[@name='NR_DOC_CONVENIO']")
         if guia != "" and guia != guia_atual:
-            self.bot.self.bot.element_set_text(xpath="//input[@name='NR_DOC_CONVENIO']", text=guia, tentativas=4)
+            self.bot.element_set_text(xpath="//input[@name='NR_DOC_CONVENIO']", text=guia, tentativas=4)
             self.bot.tab()
 
         # Preenche o campo 'Senha'
         senha_atual = self.bot.element_get_value(xpath="//input[@name='CD_SENHA']")
         if senha != "" and senha != senha_atual:
-            self.bot.self.bot.element_set_text(xpath="//input[@name='CD_SENHA']", text=senha, tentativas=4)
+            self.bot.element_set_text(xpath="//input[@name='CD_SENHA']", text=senha, tentativas=4)
             self.bot.tab()
 
         # Preenche o campo 'Data de início de vigência'
@@ -261,7 +259,7 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.tab()
 
         # Verificar se aparece o popup de 'Operação abortada'
-        if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+        if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
             xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
             mensagem_erro = self.bot.element_get_text(xpath=xpath)
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
@@ -280,12 +278,12 @@ class EntradaUnicaPaciente(Tasy):
         for n in range(4):
             # Se aparece um popup "Informação" ou "Confirmação", clica em 'Ok'
             xpath = "//*[text()='Informação' or contains(text(),'Confirmação')]"
-            if self.bot.self.bot.search_element(xpath=xpath, tentativas=2):
+            if self.bot.search_element(xpath=xpath, tentativas=2):
                 self.bot.element_click(xpath="//*[contains(text(),'Ok')]")
 
         # Verificar se salvou com sucesso
         xpath = "//div[div[div[span[text()='Salvar']]] and contains(@class,'disable')]"
-        if self.bot.self.bot.search_element(xpath=xpath):
+        if self.bot.search_element(xpath=xpath):
             # O botão de 'Salvar' ficar desabilitado é a única forma de verificar que salvou com sucesso.
             # Mesmo assim é necessário esperar um tempo a mais. Caso contrário o popup de confirmação aparece
             self.bot.wait(5000)
@@ -293,7 +291,7 @@ class EntradaUnicaPaciente(Tasy):
 
         # Verificar se aparece o popup de 'Operação abortada'
         mensagem_erro = ''
-        if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+        if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
             xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
             mensagem_erro = self.bot.element_get_text(xpath=xpath)
             raise Exception([LOG_EX_NEGOCIO, mensagem_erro])
@@ -308,7 +306,7 @@ class EntradaUnicaPaciente(Tasy):
         :param unidade_basica: Unidade básica.
         """
         # Se a tela do convênio ainda estiver ativa, clica na aba 'Setores'
-        if self.bot.self.bot.search_element(xpath="//div[contains(text(),'Convênio')]", tentativas=1):
+        if self.bot.search_element(xpath="//div[contains(text(),'Convênio')]", tentativas=1):
             if not self.bot.element_click(xpath="//div[span[text()='Setores']]"):
                 # Clica nos '...' que tem no canto superior esquerdo para exibir as opções de aba
                 self.bot.find_element("elipsisButton", By.ID).click()
@@ -319,7 +317,7 @@ class EntradaUnicaPaciente(Tasy):
                 self.bot.find_element("elipsisButton", By.ID).click()
 
         # Se a tela de Setores não estiver no modo de edição, clica em 'Adicionar'
-        if not self.bot.self.bot.search_element(xpath="//div[input[@name='CD_SETOR_ATENDIMENTO']]"):
+        if not self.bot.search_element(xpath="//div[input[@name='CD_SETOR_ATENDIMENTO']]"):
             xpath = "//div[div[div[div[contains(text(),'Setores')]]]]//*[contains(text(),'Adicionar')]"
             if not self.bot.element_click(xpath=xpath):
                 raise Exception([LOG_EX_SISTEMA, "Botão (Adicionar) não localizado."])
@@ -333,7 +331,7 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.tab(5000)
 
             # Em alguns casos, aparece um popup 'Unidade Atendimento Disponível' para seleção da Unidade básica
-            if self.bot.self.bot.search_element(xpath="//span[text()='Unidade Atendimento Disponível']", tentativas=4):
+            if self.bot.search_element(xpath="//span[text()='Unidade Atendimento Disponível']", tentativas=4):
                 if not self.bot.element_click(xpath=f"//div[div[div[span[contains(text(),'{unidade_basica}')]]]]", delay=2000):
                     raise Exception([LOG_EX_NEGOCIO, f"Unidade básica ({unidade_basica}) não localizada."])
                 self.bot.element_click(xpath=f"//button[span[contains(text(),'OK')]]")
@@ -362,19 +360,19 @@ class EntradaUnicaPaciente(Tasy):
         for n in range(5):
             # Se aparece um popup "Informação" ou "Confirmação", clica em 'Ok'
             xpath = "//*[text()='Informação' or contains(text(),'Confirmação')]"
-            if self.bot.self.bot.search_element(xpath=xpath):
+            if self.bot.search_element(xpath=xpath):
                 self.bot.element_click(xpath="//*[contains(text(),'Ok')]")
                 continue
             break
 
         # Verificar se salvou com sucesso
         xpath = "//div[div[span[contains(text(),'Setor')]] and div[span[text()='Básica']]]"
-        if self.bot.self.bot.search_element(xpath=xpath):
+        if self.bot.search_element(xpath=xpath):
             return
 
         # Verificar se aparece o popup de 'Operação abortada'
         mensagem_erro = ''
-        if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+        if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
             xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
             mensagem_erro = self.bot.element_get_text(xpath=xpath)
 
@@ -400,7 +398,7 @@ class EntradaUnicaPaciente(Tasy):
 
         # Verificar se na coluna 'Status' aparece o simbolo da alta do paciente
         xpath = f"//div[@data-row-idx='{data_row_idx}']//div[contains(@onmouseenter,'Alta')]"
-        if self.bot.self.bot.search_element(xpath=xpath):
+        if self.bot.search_element(xpath=xpath):
             return
 
         raise Exception([LOG_EX_SISTEMA, ""])
@@ -414,12 +412,12 @@ class EntradaUnicaPaciente(Tasy):
             raise Exception([LOG_EX_SISTEMA, "Tela de atendimentos não localizada."])
 
         xpath = "//div[div[span[contains(text(),'Atendimento')]] and div[span[text()='Data da entrada']]]"
-        if self.bot.self.bot.search_element(xpath=xpath):
+        if self.bot.search_element(xpath=xpath):
             return
 
         # Verificar se aparece o popup de 'Operação abortada'
         mensagem_erro = ''
-        if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+        if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
             xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
             mensagem_erro = self.bot.element_get_text(xpath=xpath)
 
@@ -439,7 +437,7 @@ class EntradaUnicaPaciente(Tasy):
             raise Exception([LOG_EX_SISTEMA, "Menu (Diagnóstico) não localizado."])
 
         # Espera a tela de 'Diagnóstico médico' abrir
-        if not self.bot.self.bot.search_element(xpath="//div[contains(text(),'Diagnóstico médico')]"):
+        if not self.bot.search_element(xpath="//div[contains(text(),'Diagnóstico médico')]"):
             raise Exception([LOG_EX_SISTEMA, "Tela de 'Diagnóstico médico' não localizada."])
 
         # Clica no botão 'Fechar'
@@ -470,9 +468,9 @@ class EntradaUnicaPaciente(Tasy):
         # Verificar se salvou com sucesso
         mensagem_erro = ''
         xpath = "//div[div[span[contains(text(),'Medico')]] and div[span[text()='CRM']]]"
-        if not self.bot.self.bot.search_element(xpath=xpath):
+        if not self.bot.search_element(xpath=xpath):
             # Verificar se aparece o popup de 'Operação abortada'
-            if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+            if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
                 xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
                 mensagem_erro = self.bot.element_get_text(xpath=xpath)
             raise Exception([LOG_EX_SISTEMA, mensagem_erro])
@@ -500,11 +498,11 @@ class EntradaUnicaPaciente(Tasy):
 
         # Verificar se salvou com sucesso
         xpath = "//div[div[span[contains(text(),'CID 10')]] and div[span[text()='Doença']]]"
-        if self.bot.self.bot.search_element(xpath=xpath):
+        if self.bot.search_element(xpath=xpath):
             return
 
         # Verificar se aparece o popup de 'Operação abortada'
-        if self.bot.self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
+        if self.bot.search_element(xpath="//div[text()='Operação abortada']", tentativas=1):
             xpath = "//div[div[div[div[text()='Operação abortada']]]]/div[2]/div"
             mensagem_erro = self.bot.element_get_text(xpath=xpath)
 
