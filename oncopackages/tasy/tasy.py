@@ -258,7 +258,7 @@ class Tasy:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
-        for i in range(10):
+        for i in range(6):
             self.bot.key_esc(wait=1000)
 
         # Verifica se a pesquisa retornou o prontuário desejado
@@ -316,7 +316,7 @@ class Tasy:
                 raise Exception([LOG_EX_SISTEMA, "Botão (Ok) não localizado."])
 
         # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
-        for i in range(10):
+        for i in range(6):
             self.bot.key_esc(wait=1000)
 
         # Espera o campo 'Atendimento' ser atualizado para o atendimento pesquisado

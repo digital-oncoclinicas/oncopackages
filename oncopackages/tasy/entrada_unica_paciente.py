@@ -70,9 +70,7 @@ class EntradaUnicaPaciente(Tasy):
                 break
             self.bot.wait(500)
         if cd_medico_atendente_atual == '':
-            self.bot.element_click(xpath="//div[input[@name='IE_CLINICA']]")
-            if not self.bot.element_click(xpath=f"//a[span[text()='Hematologia']]", delay=1000):
-                raise Exception([LOG_EX_SISTEMA, f"Falha ao preencher o campo Clinida de atendimento."])
+            raise Exception([LOG_EX_SISTEMA, f"Falha ao preencher o médito atendente."])
 
         # Preenche o campo 'Tipo do convênio'
         tipo_convenio_atual = self.bot.element_get_text(xpath="//div[input[@name='IE_TIPO_CONVENIO']]")
@@ -155,7 +153,7 @@ class EntradaUnicaPaciente(Tasy):
             # Se a aba "Setores" estiver ativa, é necessário clicar em "Cancelar", clicar em "Sair sem salvar" e clicar
             # na aba "Convênio"
             xpath = "//span[contains(text(), 'Setor de atendimento do paciente')]"
-            if self.bot.search_element(xpath=xpath, waiting_time=2):
+            if self.bot.search_element(xpath=xpath, tentativas=2):
                 # Clicar em "Cancelar"
                 self.bot.search_element(xpath="//*[*[*[*[contains(text(), 'Cancelar')]]]]").click()
                 # No popup, clicar em "Sair sem salvar"
@@ -362,7 +360,7 @@ class EntradaUnicaPaciente(Tasy):
         for n in range(5):
             # Se aparece um popup "Informação" ou "Confirmação", clica em 'Ok'
             xpath = "//*[text()='Informação' or contains(text(),'Confirmação')]"
-            if self.bot.search_element(xpath=xpath):
+            if self.bot.search_element(xpath=xpath, tentativas=5):
                 self.bot.element_click(xpath="//*[contains(text(),'Ok')]")
                 continue
             break
