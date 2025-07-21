@@ -1,4 +1,5 @@
 from config import LOG_EX_NEGOCIO, LOG_EX_SISTEMA
+from datetime import datetime, timedelta
 from oncopackages.tasy.tasy import Tasy
 from botcity.web.bot import By, Keys
 
@@ -14,7 +15,7 @@ class EntradaUnicaPaciente(Tasy):
         :return: Número do atendimento criado.
         """
         # Se a tela de atendimentos ainda não estiver no modo de edição, clica em 'Adicionar'
-        if not self.bot.find_element("NR_ATENDIMENTO", By.NAME, waiting_time=20000, ensure_visible=True):
+        if not self.bot.find_element("NR_ATENDIMENTO", By.NAME, waiting_time=1000, ensure_visible=True):
             # Clica em 'Adicionar'
             xpath = "//div[div[div[div[contains(text(),'Atendimentos')]]]]//*[contains(text(),'Adicionar')]"
             if not self.bot.element_click(xpath=xpath, tentativas=6):
@@ -58,19 +59,33 @@ class EntradaUnicaPaciente(Tasy):
             raise Exception([LOG_EX_NEGOCIO, f"Procedência ({procedencia}) não localizada."])
 
         # Preenche o campo 'Médico Atendente'
-        if cd_medico_atendente:
-            self.bot.element_set_text(xpath="//input[@name='CD_MEDICO_RESP']", text=cd_medico_atendente)
-        else:
-            #  Clicando no campo ele preenche automaticamente
-            self.bot.element_left_click(xpath="//input[@name='CD_MEDICO_RESP']")
+        self.bot.element_left_click(xpath="//input[@name='CD_MEDICO_RESP']") #  Clicando no campo para ele preenche automaticamente
+        self.bot.tab()
         cd_medico_atendente_atual = ''
         for n in range(10):
             cd_medico_atendente_atual = self.bot.element_get_value(xpath="//input[@name='CD_MEDICO_RESP']")
             if cd_medico_atendente_atual != '':
                 break
             self.bot.wait(500)
-        if cd_medico_atendente_atual == '':
-            raise Exception([LOG_EX_SISTEMA, f"Falha ao preencher o médito atendente."])
+        if cd_medico_atendente and cd_medico_atendente != cd_medico_atendente_atual:
+            # Se o médico nunca foi informado, aparece uma tela de pesquisa. Clicar em "Cancelar"
+            if not cd_medico_atendente_atual:
+                self.bot.element_click(xpath="//*[contains(text(), 'Cancelar')]")
+
+            medico_anterior = self.bot.search_element(xpath="//div[div[*[div[div[input[@name='CD_MEDICO_RESP']]]]]]/div[2]/input").get_attribute("value")
+            self.bot.search_element(xpath="//input[@name='CD_MEDICO_RESP']").send_keys(cd_medico_atendente)
+            self.bot.tab()
+            medico_novo = ''
+            for n in range(10):
+                medico_novo = self.bot.search_element(xpath="//div[div[*[div[div[input[@name='CD_MEDICO_RESP']]]]]]/div[2]/input").get_attribute("value")
+                if medico_novo and medico_novo != medico_anterior:
+                    break
+                self.bot.wait(500)
+            if not medico_novo or medico_novo == medico_anterior:
+                raise Exception([LOG_EX_SISTEMA, f"Falha ao buscar o médito atendente."])
+
+        elif not cd_medico_atendente_atual:
+            raise Exception([LOG_EX_SISTEMA, "Médito atendente não localizado."])
 
         # Preenche o campo 'Tipo do convênio'
         tipo_convenio_atual = self.bot.element_get_text(xpath="//div[input[@name='IE_TIPO_CONVENIO']]")
@@ -150,16 +165,16 @@ class EntradaUnicaPaciente(Tasy):
         """
         # Se a tela do convênio ainda não estiver no modo de edição...
         if not self.bot.find_element("CD_USUARIO_CONVENIO", By.NAME, ensure_visible=True):
-            # Se a aba "Setores" estiver ativa, é necessário clicar em "Cancelar", clicar em "Sair sem salvar" e clicar
-            # na aba "Convênio"
+            # Se a aba "Setores" estiver ativa, é necessário clicar em "Cancelar", clicar em "Sair sem salvar"
             xpath = "//span[contains(text(), 'Setor de atendimento do paciente')]"
             if self.bot.search_element(xpath=xpath, tentativas=2):
                 # Clicar em "Cancelar"
                 self.bot.search_element(xpath="//*[*[*[*[contains(text(), 'Cancelar')]]]]").click()
                 # No popup, clicar em "Sair sem salvar"
                 self.bot.search_element(xpath="//*[contains(text(), 'Sair sem salvar')]").click()
-                # Clicar na aba "Convênios"
-                self.bot.search_element(xpath="//*[*[contains(text(), 'Convênios')]]").click()
+
+            # Clicar na aba "Convênios"
+            self.bot.search_element(xpath="//*[*[contains(text(), 'Convênios')]]").click()
 
             # Se a tela do convênio ainda não estiver no modo de edição, clica em 'Adicionar'
             if not self.bot.find_element("CD_USUARIO_CONVENIO", By.NAME, ensure_visible=True):
@@ -248,8 +263,14 @@ class EntradaUnicaPaciente(Tasy):
 
         # Preenche o campo 'Data final da vigência'
         data_final_vigencia_atual = self.bot.element_get_value(xpath="//input[@name='DT_FINAL_VIGENCIA']")
-        if data_final_vigencia != "" and data_final_vigencia != data_final_vigencia_atual:
-            self.bot.element_set_text(xpath="//input[@name='DT_FINAL_VIGENCIA']", text=data_final_vigencia)
+        dt_final_vigencia_atual = datetime.now() - timedelta(days=1)
+        if data_final_vigencia_atual:
+            dt_final_vigencia_atual = datetime.strptime(data_final_vigencia_atual, "%d/%m/%Y %H:%M:%S")
+        if data_final_vigencia or not data_final_vigencia_atual or dt_final_vigencia_atual <= datetime.now():
+            if not data_final_vigencia:
+                data_final_vigencia = (datetime.now() + timedelta(days=30)).strftime("%d%m%Y235959")
+            self.bot.search_element(xpath="//input[@name='DT_FINAL_VIGENCIA']").clear()
+            self.bot.search_element(xpath="//input[@name='DT_FINAL_VIGENCIA']").send_keys(data_final_vigencia)
             self.bot.tab()
 
         # Preenche o campo 'Observação'
@@ -286,7 +307,7 @@ class EntradaUnicaPaciente(Tasy):
         if self.bot.search_element(xpath=xpath):
             # O botão de 'Salvar' ficar desabilitado é a única forma de verificar que salvou com sucesso.
             # Mesmo assim é necessário esperar um tempo a mais. Caso contrário o popup de confirmação aparece
-            self.bot.wait(5000)
+            # self.bot.wait(5000)
             return
 
         # Verificar se aparece o popup de 'Operação abortada'
@@ -328,10 +349,10 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.element_click(xpath="//div[input[@name='CD_SETOR_ATENDIMENTO']]", delay=1000)
             if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{setor_atendimento_paciente}')]]", delay=1000):
                 raise Exception([LOG_EX_NEGOCIO, f"Setor ({setor_atendimento_paciente}) não localizado."])
-            self.bot.tab(5000)
+            # self.bot.tab(5000)
 
             # Em alguns casos, aparece um popup 'Unidade Atendimento Disponível' para seleção da Unidade básica
-            if self.bot.search_element(xpath="//span[text()='Unidade Atendimento Disponível']", tentativas=4):
+            if self.bot.search_element(xpath="//span[text()='Unidade Atendimento Disponível']", tentativas=5):
                 if not self.bot.element_click(xpath=f"//div[div[div[span[contains(text(),'{unidade_basica}')]]]]", delay=2000):
                     raise Exception([LOG_EX_NEGOCIO, f"Unidade básica ({unidade_basica}) não localizada."])
                 self.bot.element_click(xpath=f"//button[span[contains(text(),'OK')]]")

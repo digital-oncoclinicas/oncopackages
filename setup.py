@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='oncopackages',
-    version='1.40',
+    version='1.41',
     description='Biblioteca da Oncoclínicas',
     packages=find_packages()
 )
