@@ -349,7 +349,7 @@ class EntradaUnicaPaciente(Tasy):
             self.bot.element_click(xpath="//div[input[@name='CD_SETOR_ATENDIMENTO']]", delay=1000)
             if not self.bot.element_click(xpath=f"//a[span[contains(text(),'{setor_atendimento_paciente}')]]", delay=1000):
                 raise Exception([LOG_EX_NEGOCIO, f"Setor ({setor_atendimento_paciente}) não localizado."])
-            # self.bot.tab(5000)
+            self.bot.tab()
 
             # Em alguns casos, aparece um popup 'Unidade Atendimento Disponível' para seleção da Unidade básica
             if self.bot.search_element(xpath="//span[text()='Unidade Atendimento Disponível']", tentativas=5):
