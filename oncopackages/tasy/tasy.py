@@ -258,8 +258,11 @@ class Tasy:
                     raise Exception([LOG_EX_SISTEMA, mensagem_erro])
 
         # Fechar qualquer popup de alerta que aparecer. Pode aparecer mais de 1
-        for i in range(6):
-            self.bot.key_esc(wait=1000)
+        for _ in range(5):
+            xpath = "//button[@class='ng-scope handlebar-button--right btn-gray' and span[text()='Fechar']]"
+            if self.bot.element_click(xpath=xpath, tentativas=6):
+                continue
+            break
 
         # Verifica se a pesquisa retornou o prontuário desejado
         if not self.bot.search_element(f"//span[@id='NR_PRONTUARIO']/span[text()='{prontuario}']"):
